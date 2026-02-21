@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import SearchPanel from '../components/SearchPanel'
 import TracePanel from '../components/TracePanel'
 import SchemaPanel from '../components/SchemaPanel'
@@ -21,14 +21,17 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false)
   const [healthStatus, setHealthStatus] = useState<'unknown' | 'up' | 'down'>('unknown')
   const [fontSize, setFontSize] = useState<'medium' | 'large'>('medium')
+  const fontSizeRestoredRef = useRef(false)
 
-  // フォントサイズをlocalStorageから復元
+  // フォントサイズをlocalStorageから復元し、変更時に永続化
   useEffect(() => {
     const saved = localStorage.getItem('vespa-font-size')
     if (saved === 'large') setFontSize('large')
+    fontSizeRestoredRef.current = true
   }, [])
 
   useEffect(() => {
+    if (!fontSizeRestoredRef.current) return
     localStorage.setItem('vespa-font-size', fontSize)
   }, [fontSize])
 

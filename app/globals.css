@@ -51,7 +51,7 @@ html, body {
 /* CodeMirror-like textarea */
 .code-editor {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
+  font-size: var(--font-md);
   line-height: 1.6;
   background: var(--vespa-bg);
   color: #a8d8ea;
