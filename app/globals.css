@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --vespa-bg: #0c0e11;
+  --vespa-surface: #13171e;
+  --vespa-panel: #1a1f29;
+  --vespa-border: #252b38;
+  --vespa-accent: #00b4d8;
+  --vespa-amber: #f59e0b;
+  --vespa-green: #22c55e;
+  --vespa-red: #ef4444;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--vespa-bg);
+  color: #e2e8f0;
+  font-family: 'IBM Plex Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--vespa-bg); }
+::-webkit-scrollbar-thumb { background: var(--vespa-border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3a4252; }
+
+/* CodeMirror-like textarea */
+.code-editor {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  background: var(--vespa-bg);
+  color: #a8d8ea;
+  border: 1px solid var(--vespa-border);
+  border-radius: 4px;
+  padding: 12px;
+  width: 100%;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.code-editor:focus { border-color: var(--vespa-accent); }
+
+/* JSON output highlighting */
+.json-string { color: #a8d8ea; }
+.json-number { color: #f59e0b; }
+.json-boolean { color: #22c55e; }
+.json-null { color: #64748b; }
+.json-key { color: #818cf8; }
+
+/* Pulse animation for live indicators */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* Slide in for panels */
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-in { animation: slide-in 0.2s ease-out; }
+
+/* Tab underline animation */
+.tab-active { border-bottom: 2px solid var(--vespa-accent); }
+
+/* Trace tree */
+.trace-node { border-left: 1px solid var(--vespa-border); }
+.trace-node:last-child { border-left-color: transparent; }
