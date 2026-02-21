@@ -89,9 +89,12 @@ export default function Home() {
           <span style={{ fontFamily: 'monospace', fontSize: 'var(--font-sm)', color: '#3a4252', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {vespaUrl}
           </span>
-          <button onClick={() => setFontSize(fontSize === 'medium' ? 'large' : 'medium')}
+          <button
+            onClick={() => setFontSize(fontSize === 'medium' ? 'large' : 'medium')}
             style={{ background: 'none', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '5px 10px', color: '#64748b', cursor: 'pointer', fontSize: 'var(--font-base)', fontFamily: 'monospace', letterSpacing: '-0.02em' }}
-            title={fontSize === 'medium' ? '文字サイズ: 中 (クリックで大に変更)' : '文字サイズ: 大 (クリックで中に変更)'}>
+            title={fontSize === 'medium' ? '文字サイズ: 中 (クリックで大に変更)' : '文字サイズ: 大 (クリックで中に変更)'}
+            aria-label={fontSize === 'medium' ? '現在の文字サイズは中です。クリックして大に変更します。' : '現在の文字サイズは大です。クリックして中に変更します。'}
+            aria-pressed={fontSize === 'large'}>
             {fontSize === 'medium' ? 'A' : <strong>A</strong>}
             <span style={{ fontSize: 'var(--font-xxs)', verticalAlign: 'super', marginLeft: 1 }}>{fontSize === 'medium' ? '中' : '大'}</span>
           </button>
