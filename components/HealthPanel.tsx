@@ -25,7 +25,7 @@ function StatusBadge({ status }: { status: ServiceHealth['status'] }) {
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
       <span className={status === 'loading' ? 'pulse-dot' : ''} style={{ width: 8, height: 8, borderRadius: '50%', background: color, display: 'inline-block' }} />
-      <span style={{ color, fontFamily: 'monospace', fontSize: 11, fontWeight: 700 }}>{label}</span>
+      <span style={{ color, fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 700 }}>{label}</span>
     </span>
   )
 }
@@ -93,12 +93,12 @@ export default function HealthPanel({ vespaUrl, configUrl }: HealthPanelProps) {
     <div className="slide-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 12, color: '#64748b' }}>
+          <span style={{ fontFamily: 'monospace', fontSize: 'var(--font-base)', color: '#64748b' }}>
             {upCount}/{services.length} services UP
           </span>
         </div>
         <button onClick={checkHealth} disabled={loading}
-          style={{ background: 'none', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '5px 14px', color: loading ? '#64748b' : '#e2e8f0', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 12, fontFamily: 'monospace' }}>
+          style={{ background: 'none', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '5px 14px', color: loading ? '#64748b' : '#e2e8f0', cursor: loading ? 'not-allowed' : 'pointer', fontSize: 'var(--font-base)', fontFamily: 'monospace' }}>
           {loading ? '⟳ Checking...' : '↻ Refresh'}
         </button>
       </div>
@@ -108,12 +108,12 @@ export default function HealthPanel({ vespaUrl, configUrl }: HealthPanelProps) {
         {services.map(svc => (
           <div key={svc.name} style={{ background: 'var(--vespa-panel)', border: `1px solid ${svc.status === 'up' ? '#22c55e30' : svc.status === 'down' ? '#ef444430' : 'var(--vespa-border)'}`, borderRadius: 6, padding: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontWeight: 500, fontSize: 13 }}>{svc.name}</span>
+              <span style={{ fontWeight: 500, fontSize: 'var(--font-md)' }}>{svc.name}</span>
               <StatusBadge status={svc.status} />
             </div>
-            <div style={{ fontSize: 10, color: '#64748b', fontFamily: 'monospace' }}>{svc.url.replace(vespaUrl, 'container').replace(configUrl, 'configserver')}</div>
-            {svc.message && <div style={{ fontSize: 11, color: '#a8d8ea', marginTop: 4 }}>{svc.message}</div>}
-            {svc.version && <div style={{ fontSize: 10, color: '#64748b', marginTop: 2, fontFamily: 'monospace' }}>v{svc.version}</div>}
+            <div style={{ fontSize: 'var(--font-xs)', color: '#64748b', fontFamily: 'monospace' }}>{svc.url.replace(vespaUrl, 'container').replace(configUrl, 'configserver')}</div>
+            {svc.message && <div style={{ fontSize: 'var(--font-sm)', color: '#a8d8ea', marginTop: 4 }}>{svc.message}</div>}
+            {svc.version && <div style={{ fontSize: 'var(--font-xs)', color: '#64748b', marginTop: 2, fontFamily: 'monospace' }}>v{svc.version}</div>}
           </div>
         ))}
       </div>
@@ -121,7 +121,7 @@ export default function HealthPanel({ vespaUrl, configUrl }: HealthPanelProps) {
       {/* App Status - Search Chains */}
       {appStatus && typeof appStatus === 'object' && (
         <div style={{ background: 'var(--vespa-panel)', border: '1px solid var(--vespa-border)', borderRadius: 6, padding: 16 }}>
-          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', marginBottom: 12 }}>APPLICATION STATUS</div>
+          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-base)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 12 }}>APPLICATION STATUS</div>
           <AppStatusView data={appStatus} />
         </div>
       )}
@@ -129,8 +129,8 @@ export default function HealthPanel({ vespaUrl, configUrl }: HealthPanelProps) {
       {/* Cluster status */}
       {clusterStatus && (
         <div style={{ background: 'var(--vespa-panel)', border: '1px solid var(--vespa-border)', borderRadius: 6, padding: 16 }}>
-          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>CLUSTER CONTROLLER</div>
-          <pre style={{ fontFamily: 'monospace', fontSize: 11, color: '#a8d8ea', overflow: 'auto', maxHeight: 300, margin: 0 }}>
+          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-base)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>CLUSTER CONTROLLER</div>
+          <pre style={{ fontFamily: 'monospace', fontSize: 'var(--font-sm)', color: '#a8d8ea', overflow: 'auto', maxHeight: 300, margin: 0 }}>
             {typeof clusterStatus === 'string' ? clusterStatus : JSON.stringify(clusterStatus, null, 2)}
           </pre>
         </div>
@@ -139,17 +139,17 @@ export default function HealthPanel({ vespaUrl, configUrl }: HealthPanelProps) {
       {/* Metrics summary */}
       {metrics && typeof metrics === 'object' && 'nodes' in (metrics as object) && (
         <div style={{ background: 'var(--vespa-panel)', border: '1px solid var(--vespa-border)', borderRadius: 6, padding: 16 }}>
-          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', marginBottom: 12 }}>METRICS NODES</div>
+          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-base)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 12 }}>METRICS NODES</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 8 }}>
             {((metrics as Record<string, unknown>).nodes as unknown[]).map((node: unknown, i: number) => {
               const n = node as Record<string, unknown>
               return (
                 <div key={i} style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: 10 }}>
-                  <div style={{ fontFamily: 'monospace', fontSize: 11, color: '#e2e8f0', marginBottom: 4 }}>
+                  <div style={{ fontFamily: 'monospace', fontSize: 'var(--font-sm)', color: '#e2e8f0', marginBottom: 4 }}>
                     {String(n.hostname || 'node-' + i)}
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    {n.role && <span style={{ fontSize: 10, color: '#818cf8', fontFamily: 'monospace' }}>{String(n.role)}</span>}
+                    {n.role && <span style={{ fontSize: 'var(--font-xs)', color: '#818cf8', fontFamily: 'monospace' }}>{String(n.role)}</span>}
                   </div>
                 </div>
               )
@@ -167,18 +167,18 @@ function AppStatusView({ data }: { data: unknown }) {
   const chains = container?.['searcher-chains'] as Record<string, unknown> | undefined
 
   if (!chains) {
-    return <pre style={{ fontFamily: 'monospace', fontSize: 11, color: '#a8d8ea', overflow: 'auto', maxHeight: 300, margin: 0 }}>{JSON.stringify(data, null, 2)}</pre>
+    return <pre style={{ fontFamily: 'monospace', fontSize: 'var(--font-sm)', color: '#a8d8ea', overflow: 'auto', maxHeight: 300, margin: 0 }}>{JSON.stringify(data, null, 2)}</pre>
   }
 
   return (
     <div>
       {Object.entries(chains).map(([name, chain]) => (
         <div key={name} style={{ marginBottom: 12, padding: 10, background: 'var(--vespa-bg)', borderRadius: 4, border: '1px solid var(--vespa-border)' }}>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#00b4d8', marginBottom: 6 }}>Chain: {name}</div>
+          <div style={{ fontFamily: 'monospace', fontSize: 'var(--font-base)', color: '#00b4d8', marginBottom: 6 }}>Chain: {name}</div>
           {Array.isArray((chain as Record<string, unknown>)?.searchers) && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               {((chain as Record<string, unknown>).searchers as unknown[]).map((s: unknown, i: number) => (
-                <div key={i} style={{ fontSize: 11, fontFamily: 'monospace', color: '#64748b', paddingLeft: 8, borderLeft: '2px solid var(--vespa-border)' }}>
+                <div key={i} style={{ fontSize: 'var(--font-sm)', fontFamily: 'monospace', color: '#64748b', paddingLeft: 8, borderLeft: '2px solid var(--vespa-border)' }}>
                   {String((s as Record<string, unknown>)?.id || s)}
                 </div>
               ))}

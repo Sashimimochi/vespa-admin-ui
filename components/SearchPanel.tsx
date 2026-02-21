@@ -34,7 +34,7 @@ function JsonRenderer({ data, depth = 0 }: { data: unknown; depth?: number }) {
         <button
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? 'Expand array' : 'Collapse array'}
-          style={{ color: '#64748b', fontFamily: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: '0 3px', fontSize: 11 }}
+          style={{ color: '#64748b', fontFamily: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: '0 3px', fontSize: 'var(--font-sm)' }}
         >
           {collapsed ? '▶' : '▼'}
         </button>
@@ -68,7 +68,7 @@ function JsonRenderer({ data, depth = 0 }: { data: unknown; depth?: number }) {
         <button
           onClick={() => setCollapsed(!collapsed)}
           aria-label={collapsed ? 'Expand object' : 'Collapse object'}
-          style={{ color: '#64748b', fontFamily: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: '0 3px', fontSize: 11 }}
+          style={{ color: '#64748b', fontFamily: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: '0 3px', fontSize: 'var(--font-sm)' }}
         >
           {collapsed ? '▶' : '▼'}
         </button>
@@ -130,30 +130,30 @@ function HitCard({ hit, index }: { hit: HitData; index: number }) {
           padding: '8px 12px', cursor: 'pointer',
         }}
       >
-        <span style={{ color: '#475569', fontFamily: 'monospace', fontSize: 11, flexShrink: 0 }}>
+        <span style={{ color: '#475569', fontFamily: 'monospace', fontSize: 'var(--font-sm)', flexShrink: 0 }}>
           #{index + 1}
         </span>
-        <span style={{ color: '#7dd3fc', fontFamily: 'monospace', fontSize: 12, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ color: '#7dd3fc', fontFamily: 'monospace', fontSize: 'var(--font-base)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {String(hit.id || '—')}
         </span>
-        <span style={{ fontSize: 11, color: '#fb923c', fontFamily: 'monospace', flexShrink: 0 }}>
+        <span style={{ fontSize: 'var(--font-sm)', color: '#fb923c', fontFamily: 'monospace', flexShrink: 0 }}>
           score: {typeof hit.relevance === 'number' ? hit.relevance.toFixed(4) : '—'}
         </span>
         {hit.source && (
-          <span style={{ fontSize: 10, color: '#818cf8', background: '#1e1b4b', padding: '1px 6px', borderRadius: 3, fontFamily: 'monospace', flexShrink: 0 }}>
+          <span style={{ fontSize: 'var(--font-xs)', color: '#818cf8', background: '#1e1b4b', padding: '1px 6px', borderRadius: 3, fontFamily: 'monospace', flexShrink: 0 }}>
             {String(hit.source)}
           </span>
         )}
-        <span style={{ color: '#475569', fontSize: 10, flexShrink: 0 }}>{open ? '▲' : '▼'}</span>
+        <span style={{ color: '#475569', fontSize: 'var(--font-xs)', flexShrink: 0 }}>{open ? '▲' : '▼'}</span>
       </button>
 
       {/* Fields */}
       {open && (
         <div style={{ background: '#0c0e11', padding: '10px 12px' }}>
           {fieldEntries.length === 0 ? (
-            <span style={{ color: '#475569', fontSize: 12, fontFamily: 'monospace' }}>No fields</span>
+            <span style={{ color: '#475569', fontSize: 'var(--font-base)', fontFamily: 'monospace' }}>No fields</span>
           ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'JetBrains Mono, monospace', fontSize: 12 }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-base)' }}>
               <tbody>
                 {fieldEntries.map(([k, v]) => (
                   <tr key={k} style={{ borderBottom: '1px solid #1a1f29' }}>
@@ -245,10 +245,10 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
       {/* YQL Editor */}
       <div style={{ background: '#1a1f29', border: '1px solid #252b38', borderRadius: 6, padding: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em' }}>YQL QUERY</span>
+          <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em' }}>YQL QUERY</span>
           <button
             onClick={() => setYql('select * from doc where true')}
-            style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}
+            style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer' }}
           >
             Reset
           </button>
@@ -261,34 +261,34 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
           placeholder="select * from sources * where userQuery()"
           onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); runSearch() } }}
         />
-        <div style={{ fontSize: 11, color: '#475569', marginTop: 4 }}>Ctrl+Enter で実行</div>
+        <div style={{ fontSize: 'var(--font-sm)', color: '#475569', marginTop: 4 }}>Ctrl+Enter で実行</div>
       </div>
 
       {/* Parameters */}
       <div style={{ background: '#1a1f29', border: '1px solid #252b38', borderRadius: 6, padding: 14 }}>
-        <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>PARAMETERS</div>
+        <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>PARAMETERS</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8, marginBottom: 10 }}>
           {COMMON_PARAMS.map(p => (
             <div key={p.key}>
-              <label style={{ display: 'block', fontSize: 10, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>{p.key}</label>
+              <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>{p.key}</label>
               <input
                 type="text"
                 value={extraParams[p.key] || ''}
                 onChange={e => setExtraParams(prev => ({ ...prev, [p.key]: e.target.value }))}
                 placeholder={p.default || '—'}
-                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
+                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none' }}
               />
             </div>
           ))}
         </div>
         <div>
-          <label style={{ display: 'block', fontSize: 10, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>カスタムパラメーター (key=value, 1行1つ)</label>
+          <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>カスタムパラメーター (key=value, 1行1つ)</label>
           <textarea
             value={customParams}
             onChange={e => setCustomParams(e.target.value)}
             rows={2}
             placeholder={"input.query(embedding)=embed(@query)\nranking.features.query(alpha)=0.5"}
-            style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none', resize: 'vertical' }}
+            style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', resize: 'vertical' }}
           />
         </div>
       </div>
@@ -302,7 +302,7 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
             background: loading ? '#1a2a35' : '#00b4d8',
             color: loading ? '#64748b' : '#0c0e11',
             border: 'none', borderRadius: 6, padding: '10px 28px',
-            fontWeight: 600, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: 600, fontSize: 'var(--font-md)', cursor: loading ? 'not-allowed' : 'pointer',
             fontFamily: 'IBM Plex Sans', transition: 'background 0.15s',
           }}
         >
@@ -312,7 +312,7 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
 
       {/* Error */}
       {error && (
-        <div style={{ background: '#1a0f0f', border: '1px solid #ef4444', borderRadius: 6, padding: 12, color: '#ef4444', fontFamily: 'monospace', fontSize: 12 }}>
+        <div style={{ background: '#1a0f0f', border: '1px solid #ef4444', borderRadius: 6, padding: 12, color: '#ef4444', fontFamily: 'monospace', fontSize: 'var(--font-base)' }}>
           ✗ {error}
         </div>
       )}
@@ -326,35 +326,35 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
             padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
             borderBottom: 'none',
           }}>
-            <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em' }}>RESULTS</span>
+            <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em' }}>RESULTS</span>
             {totalCount !== null && (
-              <span style={{ fontSize: 12, color: '#4ade80', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 'var(--font-base)', color: '#4ade80', fontFamily: 'monospace' }}>
                 totalCount: <strong>{String(totalCount)}</strong>
               </span>
             )}
             {hits.length > 0 && totalCount !== null && hits.length < Number(totalCount) && (
-              <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 'var(--font-sm)', color: '#64748b', fontFamily: 'monospace' }}>
                 (showing {hits.length})
               </span>
             )}
             {elapsed !== null && (
-              <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>{elapsed}ms</span>
+              <span style={{ fontSize: 'var(--font-sm)', color: '#64748b', fontFamily: 'monospace' }}>{elapsed}ms</span>
             )}
             {coverage && (
-              <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 'var(--font-sm)', color: '#64748b', fontFamily: 'monospace' }}>
                 coverage: {String(coverage?.coverage ?? 0)}%
               </span>
             )}
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>
               {(['hits', 'tree', 'raw'] as const).map(m => (
                 <button key={m} onClick={() => setViewMode(m)}
-                  style={{ fontSize: 11, color: viewMode === m ? '#00b4d8' : '#64748b', background: 'none', border: '1px solid ' + (viewMode === m ? '#00b4d8' : '#252b38'), borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}>
+                  style={{ fontSize: 'var(--font-sm)', color: viewMode === m ? '#00b4d8' : '#64748b', background: 'none', border: '1px solid ' + (viewMode === m ? '#00b4d8' : '#252b38'), borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}>
                   {m}
                 </button>
               ))}
               <button
                 onClick={() => navigator.clipboard.writeText(JSON.stringify(result, null, 2))}
-                style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
               >
                 Copy
               </button>
@@ -366,7 +366,7 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
             {viewMode === 'hits' && (
               <>
                 {hits.length === 0 && (
-                  <div style={{ color: '#475569', fontFamily: 'monospace', fontSize: 13, padding: '20px 0', textAlign: 'center' }}>
+                  <div style={{ color: '#475569', fontFamily: 'monospace', fontSize: 'var(--font-md)', padding: '20px 0', textAlign: 'center' }}>
                     ヒット件数: {String(totalCount ?? 0)}　ドキュメントなし
                   </div>
                 )}
@@ -376,12 +376,12 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
               </>
             )}
             {viewMode === 'tree' && (
-              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, lineHeight: 1.7, color: '#e2e8f0' }}>
+              <div style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-base)', lineHeight: 1.7, color: '#e2e8f0' }}>
                 <JsonRenderer data={result} depth={0} />
               </div>
             )}
             {viewMode === 'raw' && (
-              <pre style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: '#e2e8f0', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              <pre style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-base)', color: '#e2e8f0', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                 {JSON.stringify(result, null, 2)}
               </pre>
             )}
