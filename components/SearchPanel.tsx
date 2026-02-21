@@ -33,6 +33,7 @@ function JsonRenderer({ data, depth = 0 }: { data: unknown; depth?: number }) {
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand array' : 'Collapse array'}
           style={{ color: '#64748b', fontFamily: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: '0 3px', fontSize: 11 }}
         >
           {collapsed ? '▶' : '▼'}
@@ -66,6 +67,7 @@ function JsonRenderer({ data, depth = 0 }: { data: unknown; depth?: number }) {
       <span>
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Expand object' : 'Collapse object'}
           style={{ color: '#64748b', fontFamily: 'inherit', background: 'none', border: 'none', cursor: 'pointer', padding: '0 3px', fontSize: 11 }}
         >
           {collapsed ? '▶' : '▼'}
@@ -120,6 +122,7 @@ function HitCard({ hit, index }: { hit: HitData; index: number }) {
       {/* Hit header */}
       <button
         onClick={() => setOpen(!open)}
+        aria-label={open ? 'Collapse document details' : 'Expand document details'}
         style={{
           display: 'flex', alignItems: 'center', gap: 10,
           width: '100%', textAlign: 'left',
@@ -233,7 +236,7 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
 
   const root = result && typeof result === 'object' ? (result as Record<string, unknown>).root as Record<string, unknown> : null
   const totalCount = root?.fields ? (root.fields as Record<string, unknown>).totalCount : null
-  const hits: HitData[] = Array.isArray(root?.children) ? (root!.children as HitData[]) : []
+  const hits: HitData[] = Array.isArray(root?.children) ? (root?.children as HitData[]) : []
   const coverage = root?.coverage as Record<string, unknown> | undefined
 
   return (
@@ -338,7 +341,7 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
             )}
             {coverage && (
               <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>
-                coverage: {String(coverage.coverage)}%
+                coverage: {String(coverage?.coverage ?? 0)}%
               </span>
             )}
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 4 }}>

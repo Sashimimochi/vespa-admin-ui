@@ -38,7 +38,6 @@ export async function POST(req: NextRequest) {
     }
 
     const res = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(30000) })
-    const contentType = res.headers.get('content-type') || ''
 
     let data: unknown
     const text = await res.text()
@@ -51,6 +50,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: res.ok, status: res.status, data })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
+    // HTTP 200 を返すのは意図的な設計。
+    // クライアントはレスポンスボディの ok / status フィールドでエラーを判定するため、
+    // ネットワークエラー・タイムアウト等の例外も含めて常に 200 で包んで返している。
     return NextResponse.json({ ok: false, status: 0, error: msg }, { status: 200 })
   }
 }

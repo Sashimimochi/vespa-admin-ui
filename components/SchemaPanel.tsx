@@ -70,7 +70,7 @@ function extIcon(name: string) {
 // レスポンスは ["http://host:19071/application/v2/.../content/schemas/music.sd", ...] という形式
 function parseUrlList(data: unknown, contentPrefix: string): FileEntry[] {
   if (!Array.isArray(data)) return []
-  
+
   const entries: FileEntry[] = []
   for (const item of data) {
     const url = typeof item === 'string' ? item : null
@@ -172,6 +172,85 @@ export default function SchemaPanel({ vespaUrl, configUrl }: SchemaPanelProps) {
       }
     }
 
+    // ---- セッションAPIフォールバック ----
+    const trySessionApi = async () => {
+      // まずアクティブアプリのURLを取得
+      const activeRes = await fetch('/api/vespa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: `/application/v2/tenant/${tenant}/application/${application}`,
+          method: 'GET',
+          vespaUrl,
+          configUrl,
+        }),
+      })
+      const activeJson = await activeRes.json()
+      addLog(`GET /application/v2/tenant/${tenant}/application/${application} → ${activeJson.status}`)
+
+      // generationからsession-idを推測、またはsession一覧を取得
+      const sessionListRes = await fetch('/api/vespa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: `/application/v2/tenant/${tenant}/session`,
+          method: 'GET',
+          vespaUrl,
+          configUrl,
+        }),
+      })
+      const sessionJson = await sessionListRes.json()
+      addLog(`GET /application/v2/tenant/${tenant}/session → ${sessionJson.status}`)
+
+      // セッション一覧から最新のものを取得
+      let sessionId: string | null = null
+      if (sessionJson.ok && Array.isArray(sessionJson.data) && sessionJson.data.length > 0) {
+        const sessions = sessionJson.data as string[]
+        // 最後のセッションID (URLから取り出す)
+        const lastSessionUrl = sessions[sessions.length - 1]
+        const match = lastSessionUrl.match(/\/session\/(\d+)/)
+        if (match) sessionId = match[1]
+      }
+
+      if (!sessionId) {
+        // generationをsession-idとして試す
+        const gen = (activeJson.data as Record<string, unknown>)?.generation
+        sessionId = gen ? String(gen) : null
+      }
+
+      if (sessionId) {
+        addLog(`セッション ${sessionId} のファイル一覧を取得...`)
+        const contentRes = await fetch('/api/vespa', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            endpoint: `/application/v2/tenant/${tenant}/session/${sessionId}/content/?recursive=true`,
+            method: 'GET',
+            vespaUrl,
+            configUrl,
+          }),
+        })
+        const contentJson = await contentRes.json()
+        addLog(`→ HTTP ${contentJson.status}`)
+
+        if (contentJson.ok && Array.isArray(contentJson.data)) {
+          const entries = parseUrlList(contentJson.data, 'content/')
+          const nonDirEntries = entries.filter(e => !e.isDir)
+          if (nonDirEntries.length > 0) {
+            addLog(`✓ セッション ${sessionId} から ${nonDirEntries.length} ファイル取得`)
+            setFiles(nonDirEntries)
+            return
+          }
+        }
+      }
+
+      setError(
+        `ファイル一覧を取得できませんでした。\n` +
+        `Config Server (${configUrl}) の /application/v2/tenant/${tenant}/application/${application}/environment/.../content/ が応答していません。\n` +
+        `テナント名・アプリ名・環境名を確認してください。`
+      )
+    }
+
     if (!success) {
       // フォールバック: session-based API で最新セッションから取得
       addLog('アプリ content API 失敗 → セッション API を試みます...')
@@ -180,85 +259,6 @@ export default function SchemaPanel({ vespaUrl, configUrl }: SchemaPanelProps) {
 
     setLoading(false)
   }, [tenant, application, environment, region, instance, vespaUrl, configUrl])
-
-  // ---- セッションAPIフォールバック ----
-  const trySessionApi = async () => {
-    // まずアクティブアプリのURLを取得
-    const activeRes = await fetch('/api/vespa', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: `/application/v2/tenant/${tenant}/application/${application}`,
-        method: 'GET',
-        vespaUrl,
-        configUrl,
-      }),
-    })
-    const activeJson = await activeRes.json()
-    addLog(`GET /application/v2/tenant/${tenant}/application/${application} → ${activeJson.status}`)
-
-    // generationからsession-idを推測、またはsession一覧を取得
-    const sessionListRes = await fetch('/api/vespa', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        endpoint: `/application/v2/tenant/${tenant}/session`,
-        method: 'GET',
-        vespaUrl,
-        configUrl,
-      }),
-    })
-    const sessionJson = await sessionListRes.json()
-    addLog(`GET /application/v2/tenant/${tenant}/session → ${sessionJson.status}`)
-
-    // セッション一覧から最新のものを取得
-    let sessionId: string | null = null
-    if (sessionJson.ok && Array.isArray(sessionJson.data) && sessionJson.data.length > 0) {
-      const sessions = sessionJson.data as string[]
-      // 最後のセッションID (URLから取り出す)
-      const lastSessionUrl = sessions[sessions.length - 1]
-      const match = lastSessionUrl.match(/\/session\/(\d+)/)
-      if (match) sessionId = match[1]
-    }
-
-    if (!sessionId) {
-      // generationをsession-idとして試す
-      const gen = (activeJson.data as Record<string, unknown>)?.generation
-      sessionId = gen ? String(gen) : null
-    }
-
-    if (sessionId) {
-      addLog(`セッション ${sessionId} のファイル一覧を取得...`)
-      const contentRes = await fetch('/api/vespa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          endpoint: `/application/v2/tenant/${tenant}/session/${sessionId}/content/?recursive=true`,
-          method: 'GET',
-          vespaUrl,
-          configUrl,
-        }),
-      })
-      const contentJson = await contentRes.json()
-      addLog(`→ HTTP ${contentJson.status}`)
-
-      if (contentJson.ok && Array.isArray(contentJson.data)) {
-        const entries = parseUrlList(contentJson.data, 'content/')
-        const nonDirEntries = entries.filter(e => !e.isDir)
-        if (nonDirEntries.length > 0) {
-          addLog(`✓ セッション ${sessionId} から ${nonDirEntries.length} ファイル取得`)
-          setFiles(nonDirEntries)
-          return
-        }
-      }
-    }
-
-    setError(
-      `ファイル一覧を取得できませんでした。\n` +
-      `Config Server (${configUrl}) の /application/v2/tenant/${tenant}/application/${application}/environment/.../content/ が応答していません。\n` +
-      `テナント名・アプリ名・環境名を確認してください。`
-    )
-  }
 
   // ---- ファイル内容取得 ----
   // fetchUrl は "http://host:19071/application/v2/.../content/schemas/music.sd" の形式
