@@ -1,23 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Proxy any request to Vespa endpoints
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { endpoint, method = 'GET', params, vespaUrl = 'http://localhost:8080', configUrl = 'http://localhost:19071' } = body
+  const {
+    endpoint,
+    method = 'GET',
+    params,
+    vespaUrl = 'http://localhost:8080',
+    configUrl = 'http://localhost:19071',
+  } = body
 
   try {
-    let url = ''
-    let fetchOptions: RequestInit = { method }
+    // Config Server へのルーティング判定
+    const isConfigEndpoint =
+      endpoint.startsWith('/application') ||
+      endpoint.startsWith('/config/') ||
+      endpoint.startsWith('/log') ||
+      endpoint.startsWith('/orchestrator')
 
-    if (endpoint.startsWith('/application') || endpoint.startsWith('/log')) {
-      url = `${configUrl}${endpoint}`
-    } else {
-      url = `${vespaUrl}${endpoint}`
-    }
+    const baseUrl = isConfigEndpoint ? configUrl : vespaUrl
+    let url = `${baseUrl}${endpoint}`
+
+    const fetchOptions: RequestInit = { method }
 
     if (params && method === 'GET') {
-      const qs = new URLSearchParams(params).toString()
-      url = `${url}${qs ? '?' + qs : ''}`
+      const qs = new URLSearchParams(
+        Object.entries(params)
+          .filter(([, v]) => v !== undefined && v !== null && v !== '')
+          .map(([k, v]) => [k, String(v)])
+      ).toString()
+      if (qs) url = `${url}${url.includes('?') ? '&' : '?'}${qs}`
     }
 
     if (params && method === 'POST') {
@@ -26,18 +38,21 @@ export async function POST(req: NextRequest) {
     }
 
     const res = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(30000) })
-    const contentType = res.headers.get('content-type') || ''
 
-    let data
-    if (contentType.includes('json')) {
-      data = await res.json()
-    } else {
-      data = await res.text()
+    let data: unknown
+    const text = await res.text()
+    try {
+      data = JSON.parse(text)
+    } catch {
+      data = text
     }
 
     return NextResponse.json({ ok: res.ok, status: res.status, data })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
-    return NextResponse.json({ ok: false, error: msg }, { status: 500 })
+    // HTTP 200 を返すのは意図的な設計。
+    // クライアントはレスポンスボディの ok / status フィールドでエラーを判定するため、
+    // ネットワークエラー・タイムアウト等の例外も含めて常に 200 で包んで返している。
+    return NextResponse.json({ ok: false, status: 0, error: msg }, { status: 200 })
   }
 }

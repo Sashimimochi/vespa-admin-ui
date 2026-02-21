@@ -16,24 +16,27 @@ function extractTraceMessages(trace: unknown, depth = 0): Array<{ level: number;
   if (!trace || typeof trace !== 'object') return results
 
   const t = trace as TraceNode
-  if (t.message) {
-    const msg = t.message as string
+  if (t.message !== undefined && t.message !== null) {
+    // message はオブジェクト・数値など何でもあり得るので必ず文字列に変換する
+    const msg = typeof t.message === 'string'
+      ? t.message
+      : JSON.stringify(t.message)
+    const lower = msg.toLowerCase()
     let type = 'info'
-    if (msg.toLowerCase().includes('token') || msg.toLowerCase().includes('stem') || msg.toLowerCase().includes('linguist')) type = 'linguistic'
-    else if (msg.toLowerCase().includes('error') || msg.toLowerCase().includes('fail')) type = 'error'
-    else if (msg.toLowerCase().includes('rewrite') || msg.toLowerCase().includes('query')) type = 'query'
-    else if (msg.toLowerCase().includes('rank') || msg.toLowerCase().includes('score')) type = 'rank'
+    if (lower.includes('token') || lower.includes('stem') || lower.includes('linguist')) type = 'linguistic'
+    else if (lower.includes('error') || lower.includes('fail')) type = 'error'
+    else if (lower.includes('rewrite') || lower.includes('query')) type = 'query'
+    else if (lower.includes('rank') || lower.includes('score')) type = 'rank'
     results.push({ level: depth, message: msg, timestamp: t.timestamp, type })
   }
 
-  if (Array.isArray((trace as Record<string, unknown>).children)) {
-    for (const child of ((trace as Record<string, unknown>).children as unknown[])) {
-      results.push(...extractTraceMessages(child, depth + 1))
-    }
-  }
-  if (Array.isArray((trace as Record<string, unknown>).trace)) {
-    for (const child of ((trace as Record<string, unknown>).trace as unknown[])) {
-      results.push(...extractTraceMessages(child, depth + 1))
+  // children / trace キーを再帰処理
+  for (const key of ['children', 'trace', 'log']) {
+    const val = (trace as Record<string, unknown>)[key]
+    if (Array.isArray(val)) {
+      for (const child of val) {
+        results.push(...extractTraceMessages(child, depth + 1))
+      }
     }
   }
 
@@ -50,7 +53,7 @@ const TYPE_COLORS: Record<string, string> = {
 
 export default function TracePanel({ vespaUrl, configUrl }: TracePanelProps) {
   const [yql, setYql] = useState("select * from sources * where userQuery()")
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState('vespa')
   const [traceLevel, setTraceLevel] = useState('4')
   const [language, setLanguage] = useState('')
   const [loading, setLoading] = useState(false)
@@ -115,6 +118,7 @@ export default function TracePanel({ vespaUrl, configUrl }: TracePanelProps) {
 
   const filtered = filterType === 'all' ? messages : messages.filter(m => m.type === filterType)
   const types = ['all', ...Array.from(new Set(messages.map(m => m.type)))]
+  const needsQuery = yql.includes('userQuery()') && !query.trim()
 
   return (
     <div className="slide-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -130,12 +134,23 @@ export default function TracePanel({ vespaUrl, configUrl }: TracePanelProps) {
               rows={2}
             />
           </div>
+          {needsQuery && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#2a1a00', border: '1px solid #f59e0b', borderRadius: 4, padding: '8px 12px' }}>
+              <span style={{ fontSize: 14 }}>⚠️</span>
+              <span style={{ fontSize: 12, color: '#fbbf24', fontFamily: 'monospace', lineHeight: 1.5 }}>
+                YQL に <strong>userQuery()</strong> が含まれています。<br />
+                下の <strong>query</strong> フィールドに検索テキストを入力しないと Vespa がエラーを返します。
+              </span>
+            </div>
+          )}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 120px', gap: 8 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 11, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>query (userQuery)</label>
+              <label style={{ display: 'block', fontSize: 11, color: needsQuery ? '#f59e0b' : '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>
+                query{needsQuery ? ' ⚠ 必須: userQuery() の展開テキスト' : ' (userQuery() の展開テキスト)'}
+              </label>
               <input type="text" value={query} onChange={e => setQuery(e.target.value)}
-                placeholder="type your search text here"
-                style={{ width: '100%', background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
+                placeholder="例: vespa search"
+                style={{ width: '100%', background: 'var(--vespa-bg)', border: `1px solid ${needsQuery ? '#f59e0b' : 'var(--vespa-border)'}`, borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
               />
             </div>
             <div>
@@ -154,9 +169,9 @@ export default function TracePanel({ vespaUrl, configUrl }: TracePanelProps) {
             </div>
           </div>
         </div>
-        <button onClick={runTrace} disabled={loading}
-          style={{ marginTop: 12, background: loading ? '#1a2a35' : 'var(--vespa-accent)', color: loading ? '#64748b' : '#0c0e11', border: 'none', borderRadius: 6, padding: '8px 20px', fontWeight: 600, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'IBM Plex Sans' }}>
-          {loading ? '⟳ Analyzing...' : '🔬 Analyze Query'}
+        <button onClick={runTrace} disabled={loading || needsQuery}
+          style={{ marginTop: 12, background: (loading || needsQuery) ? '#1a2a35' : 'var(--vespa-accent)', color: (loading || needsQuery) ? '#64748b' : '#0c0e11', border: 'none', borderRadius: 6, padding: '8px 20px', fontWeight: 600, fontSize: 13, cursor: (loading || needsQuery) ? 'not-allowed' : 'pointer', fontFamily: 'IBM Plex Sans' }}>
+          {loading ? '⟳ Analyzing...' : needsQuery ? '⚠ query を入力してください' : '🔬 Analyze Query'}
         </button>
       </div>
 
@@ -174,7 +189,13 @@ export default function TracePanel({ vespaUrl, configUrl }: TracePanelProps) {
 
       {error && (
         <div style={{ background: '#1a0f0f', border: '1px solid #ef4444', borderRadius: 6, padding: 12, color: '#ef4444', fontFamily: 'monospace', fontSize: 12 }}>
-          {error}
+          <div style={{ fontWeight: 600, marginBottom: 4 }}>❌ エラー</div>
+          <div>{error}</div>
+          {yql.includes('userQuery()') && !query && (
+            <div style={{ marginTop: 8, color: '#fbbf24', fontSize: 11 }}>
+              💡 ヒント: userQuery() を使う場合は &quot;query&quot; フィールドに検索テキストを入力してください
+            </div>
+          )}
         </div>
       )}
 
