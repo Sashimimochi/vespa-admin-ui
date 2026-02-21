@@ -1,0 +1,9 @@
+services:
+  vespa-admin-ui:
+    build: .
+    image: vespa-admin-ui:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - VESPA_URL=${VESPA_URL:-http://localhost:8080}
+      - CONFIG_URL=${CONFIG_URL:-http://localhost:19071}

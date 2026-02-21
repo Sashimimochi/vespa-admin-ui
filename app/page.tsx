@@ -21,6 +21,17 @@ export default function Home() {
   const [showSettings, setShowSettings] = useState(false)
   const [healthStatus, setHealthStatus] = useState<'unknown' | 'up' | 'down'>('unknown')
 
+  // 起動時にサーバー側の環境変数から接続先を取得する
+  useEffect(() => {
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(({ vespaUrl: v, configUrl: c }) => {
+        setVespaUrl(v)
+        setConfigUrl(c)
+      })
+      .catch(() => {})
+  }, [])
+
   // Quick health ping
   useEffect(() => {
     const ping = async () => {

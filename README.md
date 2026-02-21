@@ -14,37 +14,73 @@ Vespa Search Engine向けのデバッグ・管理画面です。Solr Adminのよ
 
 ## セットアップ
 
+### ローカル開発
+
 ```bash
-cd vespa-admin
-npm install
+npm ci
 npm run dev
 ```
 
 ブラウザで http://localhost:3000 を開く。
 
+### Docker
+
+```bash
+# イメージをビルドして起動
+docker build -t vespa-admin-ui .
+docker run -p 3000:3000 vespa-admin-ui
+
+# 接続先を環境変数で指定する場合
+docker run -p 3000:3000 \
+  -e VESPA_URL=http://my-vespa:8080 \
+  -e CONFIG_URL=http://my-configserver:19071 \
+  vespa-admin-ui
+```
+
+### docker-compose
+
+```bash
+# デフォルト設定で起動
+docker compose up
+
+# 接続先を環境変数で上書きして起動
+VESPA_URL=http://my-vespa:8080 \
+CONFIG_URL=http://my-configserver:19071 \
+docker compose up
+```
+
 ## 設定
 
-右上の **⚙ Settings** から接続先を変更できます：
+### 環境変数
 
-| 設定項目 | デフォルト | 説明 |
+| 環境変数 | デフォルト | 説明 |
 |---------|-----------|------|
-| Vespa Container URL | `http://localhost:8080` | 検索・ヘルス・メトリクスAPI |
-| Config Server URL | `http://localhost:19071` | アプリパッケージ・ログAPI |
+| `VESPA_URL` | `http://localhost:8080` | Vespa Containerエンドポイント |
+| `CONFIG_URL` | `http://localhost:19071` | Config Serverエンドポイント |
+
+環境変数を設定すると、起動時のデフォルト接続先として使用されます（ビルド不要）。
+起動後は右上の **⚙ Settings** から画面上でも変更できます。
 
 ### CORSについて
 
 Next.jsのAPI Routeがプロキシとして機能するため、ブラウザのCORS制約は問題になりません。
 Vespa AdminサーバーからVespaへアクセスします。
 
-### Kubernetes/Docker環境
+### Kubernetes環境
+
+```yaml
+# Kubernetes Deployment例
+env:
+  - name: VESPA_URL
+    value: "http://vespa-container-svc:8080"
+  - name: CONFIG_URL
+    value: "http://vespa-configserver-svc:19071"
+```
 
 ```bash
 # port-forward例
 kubectl port-forward svc/vespa-container 8080:8080
 kubectl port-forward svc/vespa-configserver 19071:19071
-
-# または環境変数でURLを変更
-NEXT_PUBLIC_VESPA_URL=http://my-vespa:8080 npm run dev
 ```
 
 ## Vespa APIの対応表
