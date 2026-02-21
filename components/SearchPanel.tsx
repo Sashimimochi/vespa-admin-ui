@@ -207,6 +207,7 @@ export default function SearchPanel({ vespaUrl, configUrl }: SearchPanelProps) {
     }
     if (customParams.trim()) {
       for (const line of customParams.split('\n')) {
+        if (!line.trim()) continue
         const idx = line.indexOf('=')
         if (idx > 0) {
           params[line.slice(0, idx).trim()] = line.slice(idx + 1).trim()
