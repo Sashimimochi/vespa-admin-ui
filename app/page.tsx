@@ -5,9 +5,11 @@ import TracePanel from '../components/TracePanel'
 import SchemaPanel from '../components/SchemaPanel'
 import HealthPanel from '../components/HealthPanel'
 import LogsPanel from '../components/LogsPanel'
+import DocumentPanel from '../components/DocumentPanel'
 
 const TABS = [
   { id: 'search', label: '🔍 Search', short: 'Search' },
+  { id: 'document', label: '📥 Documents', short: 'Documents' },
   { id: 'trace', label: '🔬 Query Trace', short: 'Trace' },
   { id: 'schema', label: '🗄️ Schema / Config', short: 'Schema' },
   { id: 'health', label: '💚 Health', short: 'Health' },
@@ -137,6 +139,7 @@ export default function Home() {
       {/* Content */}
       <main style={{ flex: 1, overflow: 'auto', padding: 20 }}>
         {tab === 'search' && <SearchPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
+        {tab === 'document' && <DocumentPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
         {tab === 'trace' && <TracePanel vespaUrl={vespaUrl} configUrl={configUrl} />}
         {tab === 'schema' && <SchemaPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
         {tab === 'health' && <HealthPanel vespaUrl={vespaUrl} configUrl={configUrl} />}

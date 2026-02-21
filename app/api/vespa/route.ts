@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
     configUrl = 'http://localhost:19071',
   } = body
 
+  const { requestBody } = body
+
   try {
     // Config Server へのルーティング判定
     const isConfigEndpoint =
@@ -35,6 +37,11 @@ export async function POST(req: NextRequest) {
     if (params && method === 'POST') {
       fetchOptions.headers = { 'Content-Type': 'application/json' }
       fetchOptions.body = JSON.stringify(params)
+    }
+
+    if (requestBody !== undefined && (method === 'PUT' || method === 'POST' || method === 'DELETE')) {
+      fetchOptions.headers = { ...(fetchOptions.headers as Record<string, string>), 'Content-Type': 'application/json' }
+      fetchOptions.body = JSON.stringify(requestBody)
     }
 
     const res = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(30000) })
