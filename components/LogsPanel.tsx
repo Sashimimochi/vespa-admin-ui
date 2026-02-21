@@ -77,6 +77,7 @@ export default function LogsPanel() {
         </div>
         <div>
           <textarea
+            aria-label="Vespa log content"
             value={pastedLog}
             onChange={e => setPastedLog(e.target.value)}
             rows={5}
