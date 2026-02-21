@@ -157,7 +157,7 @@ export default function Home() {
         {tab === 'trace' && <TracePanel vespaUrl={vespaUrl} configUrl={configUrl} />}
         {tab === 'schema' && <SchemaPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
         {tab === 'health' && <HealthPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
-        {tab === 'logs' && <LogsPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
+        {tab === 'logs' && <LogsPanel />}
       </main>
     </div>
   )

@@ -1,8 +1,6 @@
 'use client'
 import { useState, useCallback } from 'react'
 
-interface LogsPanelProps { vespaUrl: string; configUrl: string }
-
 interface LogLine {
   timestamp: string
   level: string
@@ -50,51 +48,15 @@ function parseVespaLog(raw: string): LogLine[] {
   })
 }
 
-export default function LogsPanel({ vespaUrl, configUrl }: LogsPanelProps) {
+export default function LogsPanel() {
   const [logs, setLogs] = useState<LogLine[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
   const [filterLevel, setFilterLevel] = useState('all')
   const [filterText, setFilterText] = useState('')
-  const [source, setSource] = useState<'api' | 'paste'>('api')
   const [pastedLog, setPastedLog] = useState('')
-  const [seconds, setSeconds] = useState('300')
-  const [component, setComponent] = useState('')
 
-  const fetchLogs = useCallback(async () => {
-    setLoading(true)
-    setError('')
-
-    if (source === 'paste') {
-      setLogs(parseVespaLog(pastedLog))
-      setLoading(false)
-      return
-    }
-
-    const params: Record<string, string> = {}
-    if (seconds) params['last-seconds'] = seconds
-    if (component) params.component = component
-
-    try {
-      const res = await fetch('/api/vespa', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ endpoint: '/log/v1/log', method: 'GET', params, vespaUrl, configUrl })
-      })
-      const json = await res.json()
-
-      if (json.ok) {
-        const raw = typeof json.data === 'string' ? json.data : JSON.stringify(json.data, null, 2)
-        setLogs(parseVespaLog(raw))
-      } else {
-        setError('Log API not available. Try pasting log content directly, or fetch logs via: vespa-logfmt /opt/vespa/logs/vespa/vespa.log')
-        // Try error log as fallback
-      }
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : String(e))
-    }
-    setLoading(false)
-  }, [source, pastedLog, seconds, component, vespaUrl, configUrl])
+  const parseLogs = useCallback(() => {
+    setLogs(parseVespaLog(pastedLog))
+  }, [pastedLog])
 
   const filtered = logs.filter(l => {
     if (filterLevel !== 'all' && l.level !== filterLevel) return false
@@ -110,58 +72,25 @@ export default function LogsPanel({ vespaUrl, configUrl }: LogsPanelProps) {
   return (
     <div className="slide-in" style={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}>
       <div style={{ background: 'var(--vespa-panel)', border: '1px solid var(--vespa-border)', borderRadius: 6, padding: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
-          <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-base)', fontWeight: 600, letterSpacing: '0.08em' }}>LOG SOURCE</span>
-          <div style={{ display: 'flex', gap: 4 }}>
-            {(['api', 'paste'] as const).map(s => (
-              <button key={s} onClick={() => setSource(s)}
-                style={{ fontSize: 'var(--font-sm)', color: source === s ? 'var(--vespa-accent)' : '#64748b', background: 'none', border: '1px solid ' + (source === s ? 'var(--vespa-accent)' : 'var(--vespa-border)'), borderRadius: 4, padding: '3px 10px', cursor: 'pointer', fontFamily: 'monospace' }}>
-                {s === 'api' ? 'Log API' : 'Paste Logs'}
-              </button>
-            ))}
-          </div>
+        <div style={{ marginBottom: 8 }}>
+          <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-base)', fontWeight: 600, letterSpacing: '0.08em' }}>PASTE LOGS</span>
         </div>
-
-        {source === 'api' ? (
-          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-            <div>
-              <label style={{ fontSize: 'var(--font-xs)', color: '#64748b', display: 'block', fontFamily: 'monospace', marginBottom: 3 }}>Last N seconds</label>
-              <input type="number" value={seconds} onChange={e => setSeconds(e.target.value)}
-                style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', width: 100 }} />
-            </div>
-            <div>
-              <label style={{ fontSize: 'var(--font-xs)', color: '#64748b', display: 'block', fontFamily: 'monospace', marginBottom: 3 }}>Component filter</label>
-              <input type="text" value={component} onChange={e => setComponent(e.target.value)}
-                placeholder="e.g. qrserver"
-                style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '5px 8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', width: 160 }} />
-            </div>
-            <button onClick={fetchLogs} disabled={loading}
-              style={{ background: loading ? '#1a2a35' : 'var(--vespa-accent)', color: loading ? '#64748b' : '#0c0e11', border: 'none', borderRadius: 6, padding: '7px 18px', fontWeight: 600, fontSize: 'var(--font-md)', cursor: loading ? 'not-allowed' : 'pointer', fontFamily: 'IBM Plex Sans' }}>
-              {loading ? '⟳' : '⬇ Fetch'}
-            </button>
-          </div>
-        ) : (
-          <div>
-            <textarea
-              value={pastedLog}
-              onChange={e => setPastedLog(e.target.value)}
-              rows={5}
-              placeholder="Paste Vespa log content here (vespa-logfmt format or JSON lines)..."
-              style={{ width: '100%', background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-sm)', outline: 'none', resize: 'vertical' }}
-            />
-            <button onClick={fetchLogs} style={{ marginTop: 8, background: 'var(--vespa-accent)', color: '#0c0e11', border: 'none', borderRadius: 6, padding: '7px 18px', fontWeight: 600, fontSize: 'var(--font-md)', cursor: 'pointer', fontFamily: 'IBM Plex Sans' }}>
-              Parse Logs
-            </button>
-          </div>
-        )}
-
-        {error && <div style={{ marginTop: 8, fontSize: 'var(--font-sm)', color: '#f59e0b', fontFamily: 'monospace' }}>⚠ {error}</div>}
-        {source === 'api' && (
-          <div style={{ marginTop: 10, fontSize: 'var(--font-sm)', color: '#64748b', fontFamily: 'monospace', lineHeight: 1.6 }}>
-            Endpoint: <span style={{ color: '#64748b' }}>{configUrl}/log/v1/log</span>
-            <br />To export from Vespa container: <code style={{ color: '#a8d8ea' }}>vespa-logfmt -l all /opt/vespa/logs/vespa/vespa.log | tail -500</code>
-          </div>
-        )}
+        <div>
+          <textarea
+            aria-label="Vespa log content"
+            value={pastedLog}
+            onChange={e => setPastedLog(e.target.value)}
+            rows={5}
+            placeholder="Paste Vespa log content here (vespa-logfmt format or JSON lines)..."
+            style={{ width: '100%', background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '8px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-sm)', outline: 'none', resize: 'vertical' }}
+          />
+          <button onClick={parseLogs} style={{ marginTop: 8, background: 'var(--vespa-accent)', color: '#0c0e11', border: 'none', borderRadius: 6, padding: '7px 18px', fontWeight: 600, fontSize: 'var(--font-md)', cursor: 'pointer', fontFamily: 'IBM Plex Sans' }}>
+            Parse Logs
+          </button>
+        </div>
+        <div style={{ marginTop: 10, fontSize: 'var(--font-sm)', color: '#64748b', fontFamily: 'monospace', lineHeight: 1.6 }}>
+          To export from Vespa container: <code style={{ color: '#a8d8ea' }}>vespa-logfmt -l all /opt/vespa/logs/vespa/vespa.log | tail -500</code>
+        </div>
       </div>
 
       {/* Level stats */}
@@ -216,7 +145,7 @@ export default function LogsPanel({ vespaUrl, configUrl }: LogsPanelProps) {
         </div>
       )}
 
-      {logs.length === 0 && !loading && !error && (
+      {logs.length === 0 && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#3a4252', fontFamily: 'monospace', fontSize: 'var(--font-md)', flexDirection: 'column', gap: 8 }}>
           <span style={{ fontSize: 32 }}>📋</span>
           <span>No logs loaded yet</span>
