@@ -25,7 +25,7 @@ interface ParsedCluster {
   nodes: TopologyNode[]
 }
 
-function extractClusterName(configId: string, role: string, type: string): string {
+export function extractClusterName(configId: string, role: string, type: string): string {
   if (configId) {
     const parts = configId.split('/')
     if (parts.length >= 2) return parts[1]
@@ -38,7 +38,7 @@ function extractClusterName(configId: string, role: string, type: string): strin
   return 'default'
 }
 
-function parseClusterTopology(metrics: unknown): ParsedCluster[] {
+export function parseClusterTopology(metrics: unknown): ParsedCluster[] {
   if (!metrics || typeof metrics !== 'object') return []
   const nodes = (metrics as Record<string, unknown>).nodes
   if (!Array.isArray(nodes) || nodes.length === 0) return []
