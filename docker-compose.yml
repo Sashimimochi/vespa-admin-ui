@@ -1,0 +1,14 @@
+services:
+  vespa-admin-ui:
+    image: vespa-admin-ui:latest
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # クエリコンテナのURL (search / health 用)
+      - VESPA_URL=http://vespa:8081
+      # フィードコンテナのURL (documents 用)
+      - FEED_URL=http://vespa:8080
+      # コンフィグサーバーのURL (schema / logs 用)
+      - CONFIG_URL=http://vespa:19071
+    restart: unless-stopped

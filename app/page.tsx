@@ -23,15 +23,43 @@ function loadSettings() {
   try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} }
 }
 
+const DEFAULT_VESPA_URL = 'http://localhost:8081'
+const DEFAULT_FEED_URL = 'http://localhost:8080'
+const DEFAULT_CONFIG_URL = 'http://localhost:19071'
+
+async function fetchDefaultConfig(): Promise<{ vespaUrl: string; feedUrl: string; configUrl: string }> {
+  try {
+    const res = await fetch('/api/config')
+    return await res.json()
+  } catch {
+    return { vespaUrl: DEFAULT_VESPA_URL, feedUrl: DEFAULT_FEED_URL, configUrl: DEFAULT_CONFIG_URL }
+  }
+}
+
 export default function Home() {
   const [tab, setTab] = useState('search')
-  const [vespaUrl, setVespaUrl] = useState(() => loadSettings().vespaUrl ?? 'http://localhost:8081')
-  const [feedUrl, setFeedUrl] = useState(() => loadSettings().feedUrl ?? 'http://localhost:8080')
-  const [configUrl, setConfigUrl] = useState(() => loadSettings().configUrl ?? 'http://localhost:19071')
+  const [vespaUrl, setVespaUrl] = useState(() => loadSettings().vespaUrl ?? DEFAULT_VESPA_URL)
+  const [feedUrl, setFeedUrl] = useState(() => loadSettings().feedUrl ?? DEFAULT_FEED_URL)
+  const [configUrl, setConfigUrl] = useState(() => loadSettings().configUrl ?? DEFAULT_CONFIG_URL)
   const [showSettings, setShowSettings] = useState(false)
   const [healthStatus, setHealthStatus] = useState<'unknown' | 'up' | 'down'>('unknown')
   const [fontSize, setFontSize] = useState<'medium' | 'large'>('medium')
   const fontSizeRestoredRef = useRef(false)
+
+  // 環境変数ベースのデフォルト値をサーバーから取得（localStorageに設定が無い場合）
+  useEffect(() => {
+    const s = loadSettings()
+    const needsVespaUrl = !s.vespaUrl
+    const needsFeedUrl = !s.feedUrl
+    const needsConfigUrl = !s.configUrl
+    if (needsVespaUrl || needsFeedUrl || needsConfigUrl) {
+      fetchDefaultConfig().then(cfg => {
+        if (needsVespaUrl) setVespaUrl(cfg.vespaUrl)
+        if (needsFeedUrl) setFeedUrl(cfg.feedUrl)
+        if (needsConfigUrl) setConfigUrl(cfg.configUrl)
+      })
+    }
+  }, [])
 
   // フォントサイズをlocalStorageから復元し、変更時に永続化
   useEffect(() => {
@@ -146,7 +174,7 @@ export default function Home() {
           </div>
           <div>
             <button
-              onClick={() => { setVespaUrl('http://localhost:8081'); setFeedUrl('http://localhost:8080'); setConfigUrl('http://localhost:19071') }}
+              onClick={() => fetchDefaultConfig().then(cfg => { setVespaUrl(cfg.vespaUrl); setFeedUrl(cfg.feedUrl); setConfigUrl(cfg.configUrl) })}
               style={{ background: 'none', border: '1px solid #334155', borderRadius: 4, padding: '6px 12px', color: '#64748b', cursor: 'pointer', fontSize: 'var(--font-sm)', fontFamily: 'monospace' }}
             >
               ↺ Reset defaults
