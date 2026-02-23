@@ -5,19 +5,29 @@ import TracePanel from '../components/TracePanel'
 import SchemaPanel from '../components/SchemaPanel'
 import HealthPanel from '../components/HealthPanel'
 import LogsPanel from '../components/LogsPanel'
+import DocumentPanel from '../components/DocumentPanel'
 
 const TABS = [
   { id: 'search', label: '🔍 Search', short: 'Search' },
+  { id: 'document', label: '📥 Documents', short: 'Documents' },
   { id: 'trace', label: '🔬 Query Trace', short: 'Trace' },
   { id: 'schema', label: '🗄️ Schema / Config', short: 'Schema' },
   { id: 'health', label: '💚 Health', short: 'Health' },
   { id: 'logs', label: '📋 Logs', short: 'Logs' },
 ]
 
+const LS_KEY = 'vespa-admin-settings'
+
+function loadSettings() {
+  if (typeof window === 'undefined') return {}
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}') } catch { return {} }
+}
+
 export default function Home() {
   const [tab, setTab] = useState('search')
-  const [vespaUrl, setVespaUrl] = useState('http://localhost:8080')
-  const [configUrl, setConfigUrl] = useState('http://localhost:19071')
+  const [vespaUrl, setVespaUrl] = useState(() => loadSettings().vespaUrl ?? 'http://localhost:8081')
+  const [feedUrl, setFeedUrl] = useState(() => loadSettings().feedUrl ?? 'http://localhost:8080')
+  const [configUrl, setConfigUrl] = useState(() => loadSettings().configUrl ?? 'http://localhost:19071')
   const [showSettings, setShowSettings] = useState(false)
   const [healthStatus, setHealthStatus] = useState<'unknown' | 'up' | 'down'>('unknown')
   const [fontSize, setFontSize] = useState<'medium' | 'large'>('medium')
@@ -34,6 +44,11 @@ export default function Home() {
     if (!fontSizeRestoredRef.current) return
     localStorage.setItem('vespa-font-size', fontSize)
   }, [fontSize])
+
+  // Persist settings to localStorage
+  useEffect(() => {
+    localStorage.setItem(LS_KEY, JSON.stringify({ vespaUrl, feedUrl, configUrl }))
+  }, [vespaUrl, feedUrl, configUrl])
 
   // Quick health ping
   useEffect(() => {
@@ -89,8 +104,8 @@ export default function Home() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <span style={{ fontFamily: 'monospace', fontSize: 'var(--font-sm)', color: '#3a4252', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {vespaUrl}
+          <span style={{ fontFamily: 'monospace', fontSize: 'var(--font-sm)', color: '#3a4252', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            query:{vespaUrl.replace('http://','')} / feed:{feedUrl.replace('http://','')}
           </span>
           <button
             onClick={() => setFontSize(fontSize === 'medium' ? 'large' : 'medium')}
@@ -112,17 +127,30 @@ export default function Home() {
       {showSettings && (
         <div style={{ background: 'var(--vespa-surface)', borderBottom: '1px solid var(--vespa-border)', padding: '12px 20px', display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div>
-            <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', fontFamily: 'monospace', marginBottom: 4, letterSpacing: '0.08em' }}>VESPA CONTAINER URL</label>
+            <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', fontFamily: 'monospace', marginBottom: 4, letterSpacing: '0.08em' }}>QUERY CONTAINER URL</label>
             <input type="text" value={vespaUrl} onChange={e => setVespaUrl(e.target.value)}
-              style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', width: 280 }} />
+              style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', width: 260 }} />
+            <div style={{ fontSize: 'var(--font-xs)', color: '#475569', marginTop: 3, fontFamily: 'monospace' }}>Search ・ Health 用 (<code style={{ color: '#a78bfa' }}>&lt;search/&gt;</code> コンテナ)</div>
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', fontFamily: 'monospace', marginBottom: 4, letterSpacing: '0.08em' }}>FEED CONTAINER URL</label>
+            <input type="text" value={feedUrl} onChange={e => setFeedUrl(e.target.value)}
+              style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', width: 260 }} />
+            <div style={{ fontSize: 'var(--font-xs)', color: '#475569', marginTop: 3, fontFamily: 'monospace' }}>Documents 用 (<code style={{ color: '#a78bfa' }}>&lt;document-api/&gt;</code> コンテナ)</div>
           </div>
           <div>
             <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', fontFamily: 'monospace', marginBottom: 4, letterSpacing: '0.08em' }}>CONFIG SERVER URL</label>
             <input type="text" value={configUrl} onChange={e => setConfigUrl(e.target.value)}
-              style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', width: 280 }} />
+              style={{ background: 'var(--vespa-bg)', border: '1px solid var(--vespa-border)', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none', width: 260 }} />
+            <div style={{ fontSize: 'var(--font-xs)', color: '#475569', marginTop: 3, fontFamily: 'monospace' }}>Schema ・ Logs 用 (port 19071)</div>
           </div>
-          <div style={{ fontSize: 'var(--font-sm)', color: '#64748b', fontFamily: 'monospace', paddingBottom: 6, lineHeight: 1.6 }}>
-            Default ports: Container=8080, Config Server=19071
+          <div>
+            <button
+              onClick={() => { setVespaUrl('http://localhost:8081'); setFeedUrl('http://localhost:8080'); setConfigUrl('http://localhost:19071') }}
+              style={{ background: 'none', border: '1px solid #334155', borderRadius: 4, padding: '6px 12px', color: '#64748b', cursor: 'pointer', fontSize: 'var(--font-sm)', fontFamily: 'monospace' }}
+            >
+              ↺ Reset defaults
+            </button>
           </div>
         </div>
       )}
@@ -160,6 +188,7 @@ export default function Home() {
       {/* Content */}
       <main style={{ flex: 1, overflow: 'auto', padding: 20 }}>
         {tab === 'search' && <SearchPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
+        {tab === 'document' && <DocumentPanel vespaUrl={feedUrl} configUrl={configUrl} />}
         {tab === 'trace' && <TracePanel vespaUrl={vespaUrl} configUrl={configUrl} />}
         {tab === 'schema' && <SchemaPanel vespaUrl={vespaUrl} configUrl={configUrl} />}
         {tab === 'health' && <HealthPanel vespaUrl={vespaUrl} configUrl={configUrl} />}

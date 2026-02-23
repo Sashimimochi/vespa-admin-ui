@@ -10,6 +10,8 @@ export async function POST(req: NextRequest) {
     configUrl = 'http://localhost:19071',
   } = body
 
+  const { requestBody } = body
+
   try {
     // Config Server へのルーティング判定
     const isConfigEndpoint =
@@ -37,10 +39,36 @@ export async function POST(req: NextRequest) {
       fetchOptions.body = JSON.stringify(params)
     }
 
+    if (requestBody !== undefined && (method === 'PUT' || method === 'POST' || method === 'DELETE')) {
+      let bodyPayload: unknown = requestBody
+      if (typeof bodyPayload === 'string') {
+        try {
+          bodyPayload = JSON.parse(bodyPayload)
+        } catch {
+          // パース不可な生文字列はそのまま使用
+        }
+      }
+      const bodyStr = JSON.stringify(bodyPayload)
+      // Node.js native fetch (undici) は string body を Transfer-Encoding: chunked で送ることがあり、
+      // Vespa Document API が chunked encoding を正しくパースできずに VALUE_STRING エラーになる。
+      // Buffer + Content-Length を明示することで chunked を回避する。
+      const bodyBuf = Buffer.from(bodyStr, 'utf8')
+      console.log(`[api/vespa] → ${method} ${url}`)
+      console.log(`[api/vespa]   body(${bodyBuf.length}B): ${bodyStr}`)
+      fetchOptions.headers = {
+        'Content-Type': 'application/json',
+        'Content-Length': String(bodyBuf.length),
+      }
+      fetchOptions.body = bodyBuf as unknown as BodyInit
+    }
+
     const res = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(30000) })
 
     let data: unknown
     const text = await res.text()
+    if (method === 'PUT' || method === 'POST' || method === 'DELETE') {
+      console.log(`[api/vespa] ← HTTP ${res.status} ${text.slice(0, 300)}`)
+    }
     try {
       data = JSON.parse(text)
     } catch {
