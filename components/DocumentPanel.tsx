@@ -110,6 +110,16 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
 
   const needsBody = operation !== 'delete'
 
+  const handleFormatJson = (jsonString: string, setter: (v: string) => void) => {
+    try {
+      const parsed = JSON.parse(jsonString)
+      setter(JSON.stringify(parsed, null, 2))
+      setParseError('')
+    } catch {
+      setParseError('JSON のパースに失敗しました。形式を確認してください。')
+    }
+  }
+
   const buildEndpoint = (ns: string, dt: string, id: string) =>
     `/document/v1/${encodeURIComponent(ns)}/${encodeURIComponent(dt)}/docid/${encodeURIComponent(id)}`
 
@@ -350,6 +360,12 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                     📂 ファイル読み込み
                   </button>
                   <button
+                    onClick={() => handleFormatJson(jsonBody, setJsonBody)}
+                    style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                  >
+                    ✨ フォーマット
+                  </button>
+                  <button
                     onClick={() => setJsonBody('')}
                     style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
                   >
@@ -387,6 +403,12 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                 style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
               >
                 📂 ファイル読み込み
+              </button>
+              <button
+                onClick={() => handleFormatJson(batchJson, setBatchJson)}
+                style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+              >
+                ✨ フォーマット
               </button>
               <button
                 onClick={() => setBatchJson('')}
