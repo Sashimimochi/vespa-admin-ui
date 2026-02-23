@@ -227,13 +227,13 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Feed URL indicator */}
       <div style={{ background: '#0f1923', border: '1px solid #1e3a4a', borderRadius: 5, padding: '7px 12px', display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ color: '#475569', fontFamily: 'monospace', fontSize: 11 }}>Feed URL:</span>
-        <span style={{ color: '#38bdf8', fontFamily: 'monospace', fontSize: 12, fontWeight: 600 }}>{vespaUrl}</span>
-        <span style={{ color: '#334155', fontFamily: 'monospace', fontSize: 10 }}>— Settings から変更可</span>
+        <span style={{ color: '#475569', fontFamily: 'monospace', fontSize: 'var(--font-sm)' }}>Feed URL:</span>
+        <span style={{ color: '#38bdf8', fontFamily: 'monospace', fontSize: 'var(--font-base)', fontWeight: 600 }}>{vespaUrl}</span>
+        <span style={{ color: '#334155', fontFamily: 'monospace', fontSize: 'var(--font-xs)' }}>— Settings から変更可</span>
       </div>
       {/* Operation Selector */}
       <div style={{ background: '#1a1f29', border: '1px solid #252b38', borderRadius: 6, padding: 14 }}>
-        <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>OPERATION</div>
+        <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>OPERATION</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {(Object.keys(OPERATION_LABELS) as Operation[]).map(op => (
             <button
@@ -246,7 +246,7 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                 background: operation === op ? '#00b4d815' : 'none',
                 color: operation === op ? '#00b4d8' : '#64748b',
                 cursor: 'pointer',
-                fontSize: 13,
+                fontSize: 'var(--font-md)',
                 fontFamily: 'IBM Plex Sans',
                 fontWeight: operation === op ? 600 : 400,
                 transition: 'all 0.15s',
@@ -260,7 +260,7 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
 
       {/* Input Mode */}
       <div style={{ background: '#1a1f29', border: '1px solid #252b38', borderRadius: 6, padding: 14 }}>
-        <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>INPUT MODE</div>
+        <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em', marginBottom: 10 }}>INPUT MODE</div>
         <div style={{ display: 'flex', gap: 8 }}>
           {(['manual', 'batch'] as const).map(m => (
             <button
@@ -273,7 +273,7 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                 background: inputMode === m ? '#a78bfa15' : 'none',
                 color: inputMode === m ? '#a78bfa' : '#64748b',
                 cursor: 'pointer',
-                fontSize: 12,
+                fontSize: 'var(--font-base)',
                 fontFamily: 'monospace',
               }}
             >
@@ -286,30 +286,30 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
       {inputMode === 'manual' ? (
         /* Single Document */
         <div style={{ background: '#1a1f29', border: '1px solid #252b38', borderRadius: 6, padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em' }}>DOCUMENT TARGET</div>
+          <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em' }}>DOCUMENT TARGET</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 10, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>NAMESPACE</label>
+              <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>NAMESPACE</label>
               <input
                 type="text"
                 value={namespace}
                 onChange={e => setNamespace(e.target.value)}
                 placeholder="default"
-                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
+                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none' }}
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 10, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DOC TYPE</label>
+              <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DOC TYPE</label>
               <input
                 type="text"
                 value={docType}
                 onChange={e => setDocType(e.target.value)}
                 placeholder="doc"
-                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
+                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none' }}
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 10, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DOCUMENT ID</label>
+              <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DOCUMENT ID</label>
               <input
                 type="text"
                 value={docId}
@@ -326,9 +326,9 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                   }
                 }}
                 placeholder="100  または  id:music:music::100 を貼り付け"
-                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
+                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none' }}
               />
-              <div style={{ fontSize: 10, color: '#475569', marginTop: 3, fontFamily: 'monospace', lineHeight: 1.5 }}>
+              <div style={{ fontSize: 'var(--font-xs)', color: '#475569', marginTop: 3, fontFamily: 'monospace', lineHeight: 1.5 }}>
                 ヒント: <code style={{ color: '#a78bfa' }}>id:&lt;namespace&gt;:&lt;doctype&gt;::&lt;id&gt;</code> 形式を貼り付けると自動分解されます
               </div>
             </div>
@@ -337,14 +337,14 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
           {needsBody && (
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ fontSize: 10, color: '#64748b', fontFamily: 'monospace' }}>DOCUMENT BODY (JSON)</label>
+                <label style={{ fontSize: 'var(--font-xs)', color: '#64748b', fontFamily: 'monospace' }}>DOCUMENT BODY (JSON)</label>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   {operation === 'partialUpdate' && (
                     <button
                       onClick={() => setAutoWrap(v => !v)}
                       title="有効にすると単純値フィールドを {&quot;assign&quot;: value} 形式に自動変換します"
                       style={{
-                        fontSize: 11, fontFamily: 'monospace', cursor: 'pointer', padding: '2px 8px', borderRadius: 4,
+                        fontSize: 'var(--font-sm)', fontFamily: 'monospace', cursor: 'pointer', padding: '2px 8px', borderRadius: 4,
                         border: `1px solid ${autoWrap ? '#818cf8' : '#252b38'}`,
                         background: autoWrap ? '#818cf815' : 'none',
                         color: autoWrap ? '#818cf8' : '#64748b',
@@ -355,19 +355,19 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                   )}
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                    style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
                   >
                     📂 ファイル読み込み
                   </button>
                   <button
                     onClick={() => handleFormatJson(jsonBody, setJsonBody)}
-                    style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                    style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
                   >
                     ✨ フォーマット
                   </button>
                   <button
                     onClick={() => setJsonBody('')}
-                    style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                    style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
                   >
                     Clear
                   </button>
@@ -379,10 +379,10 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                 onChange={e => setJsonBody(e.target.value)}
                 rows={10}
                 placeholder={placeholder}
-                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '8px 10px', color: '#e2e8f0', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, outline: 'none', resize: 'vertical' }}
+                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '8px 10px', color: '#e2e8f0', fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-base)', outline: 'none', resize: 'vertical' }}
               />
               {autoWrap && operation === 'partialUpdate' && (
-                <div style={{ fontSize: 10, color: '#475569', marginTop: 4, fontFamily: 'monospace', lineHeight: 1.6 }}>
+                <div style={{ fontSize: 'var(--font-xs)', color: '#475569', marginTop: 4, fontFamily: 'monospace', lineHeight: 1.6 }}>
                   ⚡ <strong style={{ color: '#818cf8' }}>auto-assign ON</strong>:
                   単純値フィールド（文字列・数値等）は送信時に自動で{' '}
                   <code style={{ color: '#a78bfa' }}>{'{\"assign\": value}'}</code> 形式に変換されます。
@@ -396,51 +396,51 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
         /* Batch */
         <div style={{ background: '#1a1f29', border: '1px solid #252b38', borderRadius: 6, padding: 14, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em' }}>BATCH JSON</div>
+            <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em' }}>BATCH JSON</div>
             <div style={{ display: 'flex', gap: 6 }}>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
               >
                 📂 ファイル読み込み
               </button>
               <button
                 onClick={() => handleFormatJson(batchJson, setBatchJson)}
-                style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
               >
                 ✨ フォーマット
               </button>
               <button
                 onClick={() => setBatchJson('')}
-                style={{ fontSize: 11, color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
+                style={{ fontSize: 'var(--font-sm)', color: '#64748b', background: 'none', border: '1px solid #252b38', borderRadius: 4, padding: '2px 8px', cursor: 'pointer', fontFamily: 'monospace' }}
               >
                 Clear
               </button>
             </div>
           </div>
-          <div style={{ fontSize: 11, color: '#475569', fontFamily: 'monospace', lineHeight: 1.6 }}>
+          <div style={{ fontSize: 'var(--font-sm)', color: '#475569', fontFamily: 'monospace', lineHeight: 1.6 }}>
             デフォルト Namespace: <strong style={{ color: '#94a3b8' }}>{namespace}</strong>　Doc Type: <strong style={{ color: '#94a3b8' }}>{docType}</strong>
             （各要素で <code style={{ color: '#a78bfa' }}>namespace</code> / <code style={{ color: '#a78bfa' }}>docType</code> を指定してオーバーライド可能）
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 10, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DEFAULT NAMESPACE</label>
+              <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DEFAULT NAMESPACE</label>
               <input
                 type="text"
                 value={namespace}
                 onChange={e => setNamespace(e.target.value)}
                 placeholder="default"
-                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
+                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none' }}
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: 10, color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DEFAULT DOC TYPE</label>
+              <label style={{ display: 'block', fontSize: 'var(--font-xs)', color: '#64748b', marginBottom: 3, fontFamily: 'monospace' }}>DEFAULT DOC TYPE</label>
               <input
                 type="text"
                 value={docType}
                 onChange={e => setDocType(e.target.value)}
                 placeholder="doc"
-                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 12, outline: 'none' }}
+                style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '6px 10px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: 'var(--font-base)', outline: 'none' }}
               />
             </div>
           </div>
@@ -453,7 +453,7 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
   { "id": "doc-1", "fields": { "title": "First document" } },
   { "id": "doc-2", "namespace": "custom", "docType": "article", "fields": { "title": "Second document" } }
 ]`}
-            style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '8px 10px', color: '#e2e8f0', fontFamily: 'JetBrains Mono, monospace', fontSize: 12, outline: 'none', resize: 'vertical' }}
+            style={{ width: '100%', background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '8px 10px', color: '#e2e8f0', fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-base)', outline: 'none', resize: 'vertical' }}
           />
         </div>
       )}
@@ -469,7 +469,7 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
 
       {/* Parse Error */}
       {parseError && (
-        <div style={{ background: '#1a0f0f', border: '1px solid #ef4444', borderRadius: 6, padding: 12, color: '#ef4444', fontFamily: 'monospace', fontSize: 12 }}>
+        <div style={{ background: '#1a0f0f', border: '1px solid #ef4444', borderRadius: 6, padding: 12, color: '#ef4444', fontFamily: 'monospace', fontSize: 'var(--font-base)' }}>
           ✗ {parseError}
         </div>
       )}
@@ -483,7 +483,7 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
             background: loading ? '#1a2a35' : (operation === 'delete' ? '#7f1d1d' : '#00b4d8'),
             color: loading ? '#64748b' : (operation === 'delete' ? '#fca5a5' : '#0c0e11'),
             border: 'none', borderRadius: 6, padding: '10px 28px',
-            fontWeight: 600, fontSize: 13, cursor: loading ? 'not-allowed' : 'pointer',
+            fontWeight: 600, fontSize: 'var(--font-md)', cursor: loading ? 'not-allowed' : 'pointer',
             fontFamily: 'IBM Plex Sans', transition: 'background 0.15s',
           }}
         >
@@ -499,14 +499,14 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
             padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 16,
             borderBottom: 'none',
           }}>
-            <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em' }}>RESULTS</span>
-            <span style={{ fontSize: 12, color: '#4ade80', fontFamily: 'monospace' }}>
+            <span style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600, letterSpacing: '0.08em' }}>RESULTS</span>
+            <span style={{ fontSize: 'var(--font-base)', color: '#4ade80', fontFamily: 'monospace' }}>
               成功: <strong>{results.filter(r => r.ok).length}</strong>
             </span>
-            <span style={{ fontSize: 12, color: '#ef4444', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: 'var(--font-base)', color: '#ef4444', fontFamily: 'monospace' }}>
               失敗: <strong>{results.filter(r => !r.ok).length}</strong>
             </span>
-            <span style={{ fontSize: 11, color: '#64748b', fontFamily: 'monospace' }}>
+            <span style={{ fontSize: 'var(--font-sm)', color: '#64748b', fontFamily: 'monospace' }}>
               合計: {results.length}
             </span>
           </div>
@@ -521,13 +521,13 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                 }}
               >
                 <div style={{ background: r.ok ? '#22c55e10' : '#ef444410', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ color: r.ok ? '#22c55e' : '#ef4444', fontSize: 12, fontFamily: 'monospace', fontWeight: 600 }}>
+                  <span style={{ color: r.ok ? '#22c55e' : '#ef4444', fontSize: 'var(--font-base)', fontFamily: 'monospace', fontWeight: 600 }}>
                     {r.ok ? '✓' : '✗'}
                   </span>
-                  <span style={{ color: '#7dd3fc', fontFamily: 'monospace', fontSize: 12, flex: 1 }}>
+                  <span style={{ color: '#7dd3fc', fontFamily: 'monospace', fontSize: 'var(--font-base)', flex: 1 }}>
                     {r.docId}
                   </span>
-                  <span style={{ color: '#64748b', fontFamily: 'monospace', fontSize: 11 }}>
+                  <span style={{ color: '#64748b', fontFamily: 'monospace', fontSize: 'var(--font-sm)' }}>
                     HTTP {r.status}
                   </span>
                 </div>
@@ -535,25 +535,25 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
                   <div style={{ padding: '6px 12px', background: '#0c0e11' }}>
                     {!r.ok && isDocApiNotConfigured(r.data) ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                        <pre style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#ef4444', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                        <pre style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-sm)', color: '#ef4444', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                           {JSON.stringify(r.data, null, 2)}
                         </pre>
                         <div style={{ background: '#1a1f29', border: '1px solid #f59e0b40', borderRadius: 5, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                          <div style={{ color: '#f59e0b', fontFamily: 'monospace', fontSize: 11, fontWeight: 600 }}>⚠ 修正方法: Vespa services.xml に Document API を追加してください</div>
-                          <div style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 11, lineHeight: 1.7 }}>
+                          <div style={{ color: '#f59e0b', fontFamily: 'monospace', fontSize: 'var(--font-sm)', fontWeight: 600 }}>⚠ 修正方法: Vespa services.xml に Document API を追加してください</div>
+                          <div style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: 'var(--font-sm)', lineHeight: 1.7 }}>
                             Vespa アプリケーションの <code style={{ color: '#7dd3fc' }}>services.xml</code> の{' '}
                             <code style={{ color: '#7dd3fc' }}>&lt;container&gt;</code> ノード内に以下を追加してデプロイしてください：
                           </div>
-                          <pre style={{ background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '8px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: '#4ade80', margin: 0 }}>
+                          <pre style={{ background: '#0c0e11', border: '1px solid #252b38', borderRadius: 4, padding: '8px 12px', fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-sm)', color: '#4ade80', margin: 0 }}>
 {`<document-api/>`}
                           </pre>
-                          <div style={{ color: '#64748b', fontFamily: 'monospace', fontSize: 10, lineHeight: 1.6 }}>
+                          <div style={{ color: '#64748b', fontFamily: 'monospace', fontSize: 'var(--font-xs)', lineHeight: 1.6 }}>
                             参考: <a href="https://docs.vespa.ai/en/reference/services/container.html#document-api" target="_blank" rel="noreferrer" style={{ color: '#818cf8' }}>https://docs.vespa.ai/en/reference/services/container.html#document-api</a>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <pre style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 11, color: r.ok ? '#4ade80' : '#ef4444', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                      <pre style={{ fontFamily: 'JetBrains Mono, monospace', fontSize: 'var(--font-sm)', color: r.ok ? '#4ade80' : '#ef4444', margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
                         {typeof r.data === 'string' ? r.data : JSON.stringify(r.data, null, 2)}
                       </pre>
                     )}
