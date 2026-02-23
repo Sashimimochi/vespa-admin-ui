@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, ChangeEvent } from 'react'
 
 interface DocumentPanelProps { vespaUrl: string; configUrl: string }
 
@@ -194,7 +194,7 @@ export default function DocumentPanel({ vespaUrl, configUrl }: DocumentPanelProp
     setLoading(false)
   }
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const reader = new FileReader()

@@ -12,6 +12,22 @@
   --vespa-amber: #f59e0b;
   --vespa-green: #22c55e;
   --vespa-red: #ef4444;
+  /* Font sizes (Medium) */
+  --font-xxs: 9px;
+  --font-xs: 10px;
+  --font-sm: 11px;
+  --font-base: 12px;
+  --font-md: 13px;
+  --font-lg: 15px;
+}
+
+.font-large {
+  --font-xxs: 11px;
+  --font-xs: 13px;
+  --font-sm: 14px;
+  --font-base: 15px;
+  --font-md: 16px;
+  --font-lg: 19px;
 }
 
 * { box-sizing: border-box; }
@@ -35,7 +51,7 @@ html, body {
 /* CodeMirror-like textarea */
 .code-editor {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
+  font-size: var(--font-md);
   line-height: 1.6;
   background: var(--vespa-bg);
   color: #a8d8ea;
