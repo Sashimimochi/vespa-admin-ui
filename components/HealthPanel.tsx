@@ -12,6 +12,195 @@ interface ServiceHealth {
   generation?: number
 }
 
+interface TopologyNode {
+  hostname: string
+  fullHostname: string
+  status: 'up' | 'down' | 'unknown'
+  services: string[]
+}
+
+interface ParsedCluster {
+  type: 'admin' | 'container' | 'content'
+  name: string
+  nodes: TopologyNode[]
+}
+
+function extractClusterName(configId: string, role: string, type: string): string {
+  if (configId) {
+    const parts = configId.split('/')
+    if (parts.length >= 2) return parts[1]
+  }
+  if (role) {
+    const parts = role.split('/')
+    if (parts[0] === type && parts.length >= 2) return parts[1]
+    if (parts.length >= 2) return parts[1]
+  }
+  return 'default'
+}
+
+function parseClusterTopology(metrics: unknown): ParsedCluster[] {
+  if (!metrics || typeof metrics !== 'object') return []
+  const nodes = (metrics as Record<string, unknown>).nodes
+  if (!Array.isArray(nodes) || nodes.length === 0) return []
+
+  const clusterMap = new Map<string, ParsedCluster>()
+
+  for (const nodeData of nodes) {
+    const n = nodeData as Record<string, unknown>
+    const fullHostname = String(n.hostname || 'unknown')
+    const shortHostname = fullHostname.split('.')[0]
+    const role = String(n.role || '')
+    const services = Array.isArray(n.services) ? n.services : []
+
+    let nodeStatus: 'up' | 'down' | 'unknown' = 'unknown'
+    const serviceNames: string[] = []
+    let detectedType: 'admin' | 'container' | 'content' | null = null
+    let detectedClusterName = 'default'
+
+    for (const svcData of services) {
+      const svc = svcData as Record<string, unknown>
+      const svcName = String(svc.name || '')
+      if (svcName) serviceNames.push(svcName)
+
+      const statusCode = String((svc.status as Record<string, unknown> | undefined)?.code ?? '')
+      if (statusCode === 'up' && nodeStatus === 'unknown') nodeStatus = 'up'
+      else if (statusCode && statusCode !== 'up') nodeStatus = 'down'
+
+      const clusterType = String(svc.clusterType || '')
+      const clusterName = String(svc.clusterName || '')
+      const configId = String(svc.configId || svc.config_id || '')
+
+      if (!detectedType) {
+        if (clusterType === 'admin' || svcName.includes('configserver') || svcName.includes('slobrok') || svcName.includes('logserver')) {
+          detectedType = 'admin'
+          detectedClusterName = 'admin/config'
+        } else if (clusterType === 'container' || svcName === 'vespa.container') {
+          detectedType = 'container'
+          detectedClusterName = clusterName || extractClusterName(configId, role, 'container') || 'default'
+        } else if (clusterType === 'content' || svcName.includes('searchnode') || svcName.includes('distributor') || svcName.includes('storagenode')) {
+          detectedType = 'content'
+          detectedClusterName = clusterName || extractClusterName(configId, role, 'content') || 'default'
+        } else if (svcName.includes('clustercontroller')) {
+          detectedType = 'admin'
+          detectedClusterName = 'admin/config'
+        }
+      }
+    }
+
+    if (!detectedType && role) {
+      if (role.startsWith('container/') || role.includes('/container/')) {
+        detectedType = 'container'
+        detectedClusterName = role.split('/')[1] || 'default'
+      } else if (role.startsWith('content/') || role.startsWith('distributor/') || role.startsWith('searchnode/')) {
+        detectedType = 'content'
+        detectedClusterName = role.split('/')[1] || 'default'
+      } else if (role.startsWith('admin') || role.startsWith('hosts/')) {
+        detectedType = 'admin'
+        detectedClusterName = 'admin/config'
+      }
+    }
+
+    if (detectedType) {
+      const key = `${detectedType}:${detectedClusterName}`
+      if (!clusterMap.has(key)) {
+        clusterMap.set(key, { type: detectedType, name: detectedClusterName, nodes: [] })
+      }
+      clusterMap.get(key)!.nodes.push({ hostname: shortHostname, fullHostname, status: nodeStatus, services: serviceNames })
+    }
+  }
+
+  return Array.from(clusterMap.values())
+}
+
+function NodeIcon({ node }: { node: TopologyNode }) {
+  const color = node.status === 'up' ? '#22c55e' : node.status === 'down' ? '#ef4444' : '#64748b'
+  return (
+    <div title={node.fullHostname} style={{ textAlign: 'center', cursor: 'default' }}>
+      <div style={{ width: 40, height: 40, background: '#1e293b', border: `2px solid ${color}40`, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', margin: '0 auto' }}>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <rect x="2" y="2" width="16" height="6" rx="1.5" stroke={color} strokeWidth="1.3" />
+          <rect x="2" y="11" width="16" height="6" rx="1.5" stroke={color} strokeWidth="1.3" />
+          <circle cx="15" cy="5" r="1.2" fill={color} />
+          <circle cx="15" cy="14" r="1.2" fill={color} />
+        </svg>
+        <div style={{ position: 'absolute', top: -3, right: -3, width: 8, height: 8, borderRadius: '50%', background: color, border: '2px solid #0f1117' }} />
+      </div>
+      <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#64748b', marginTop: 3, maxWidth: 48, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        {node.hostname}
+      </div>
+    </div>
+  )
+}
+
+function ClusterBox({ cluster }: { cluster: ParsedCluster }) {
+  const cfg = {
+    admin: { color: '#a855f7', bg: '#a855f710', border: '#a855f730', label: 'admin / config cluster' },
+    container: { color: '#3b82f6', bg: '#3b82f610', border: '#3b82f630', label: 'container cluster' },
+    content: { color: '#f59e0b', bg: '#f59e0b10', border: '#f59e0b30', label: 'content cluster' },
+  }[cluster.type]
+  const upCount = cluster.nodes.filter(n => n.status === 'up').length
+  const displayName = cluster.name !== 'default' && cluster.name !== 'admin/config' ? cluster.name : ''
+
+  return (
+    <div style={{ border: `1.5px solid ${cfg.border}`, background: cfg.bg, borderRadius: 8, padding: '10px 14px', minWidth: 180 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <span style={{ color: cfg.color, fontFamily: 'monospace', fontSize: 11, fontWeight: 700, letterSpacing: '0.05em' }}>
+          {displayName ? `${displayName} · ` : ''}{cfg.label}
+        </span>
+        <span style={{ color: '#64748b', fontFamily: 'monospace', fontSize: 10, marginLeft: 8, flexShrink: 0 }}>
+          {upCount}/{cluster.nodes.length} UP
+        </span>
+      </div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+        {cluster.nodes.map((node) => <NodeIcon key={node.fullHostname} node={node} />)}
+      </div>
+    </div>
+  )
+}
+
+function ClusterTopologyView({ metrics }: { metrics: unknown }) {
+  const clusters = parseClusterTopology(metrics)
+  if (clusters.length === 0) return null
+
+  const adminClusters = clusters.filter(c => c.type === 'admin')
+  const containerClusters = clusters.filter(c => c.type === 'container')
+  const contentClusters = clusters.filter(c => c.type === 'content')
+
+  return (
+    <div style={{ background: 'var(--vespa-panel)', border: '1px solid var(--vespa-border)', borderRadius: 6, padding: 16 }}>
+      <div style={{ color: '#818cf8', fontFamily: 'monospace', fontSize: 12, fontWeight: 600, letterSpacing: '0.08em', marginBottom: 14 }}>
+        CLUSTER TOPOLOGY
+      </div>
+      <div style={{ border: '1.5px solid var(--vespa-border)', borderRadius: 8, padding: 16, background: 'var(--vespa-bg)', position: 'relative' }}>
+        <span style={{ position: 'absolute', top: -9, left: 14, background: 'var(--vespa-bg)', padding: '0 6px', fontSize: 10, fontFamily: 'monospace', color: '#64748b', fontWeight: 700, letterSpacing: '0.08em' }}>
+          VESPA CLUSTER
+        </span>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          {adminClusters.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {adminClusters.map((c) => <ClusterBox key={`${c.type}:${c.name}`} cluster={c} />)}
+            </div>
+          )}
+          {(containerClusters.length > 0 || contentClusters.length > 0) && (
+            <div style={{ flex: 1, minWidth: 180, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {containerClusters.length > 0 && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {containerClusters.map((c) => <ClusterBox key={`${c.type}:${c.name}`} cluster={c} />)}
+                </div>
+              )}
+              {contentClusters.length > 0 && (
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  {contentClusters.map((c) => <ClusterBox key={`${c.type}:${c.name}`} cluster={c} />)}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const BASE_SERVICES = (vespaUrl: string, configUrl: string): ServiceHealth[] => [
   { name: 'Container (Query)', url: `${vespaUrl}/state/v1/health`, status: 'unknown' },
   { name: 'Config Server', url: `${configUrl}/state/v1/health`, status: 'unknown' },
@@ -117,6 +306,9 @@ export default function HealthPanel({ vespaUrl, configUrl }: HealthPanelProps) {
           </div>
         ))}
       </div>
+
+      {/* Cluster Topology */}
+      <ClusterTopologyView metrics={metrics} />
 
       {/* App Status - Search Chains */}
       {appStatus && typeof appStatus === 'object' && (
