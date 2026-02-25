@@ -73,6 +73,42 @@ document-summary debug-summary {
 
 Query Traceタブで `summary=debug-summary` を指定して実行するとトークンが表示されます。
 
+## テスト
+
+[Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/) を使用しています。テストファイルは `__tests__/` 配下に配置されています。
+
+```
+__tests__/
+  api/        # API Route のユニットテスト
+  components/ # React コンポーネントのテスト
+  utils/      # ユーティリティ関数のテスト
+```
+
+### テスト実行
+
+```bash
+# 全テストを実行
+npm test
+
+# ウォッチモードで実行（ファイル変更を監視）
+npm test -- --watch
+
+# CI環境向け（インタラクティブ入力なし）
+npm run test:ci
+
+# 特定ファイルのみ実行
+npm test -- __tests__/components/HealthPanel.test.tsx
+```
+
+### テスト環境
+
+| 項目 | 内容 |
+|------|------|
+| テストフレームワーク | Jest |
+| DOM環境 | jsdom |
+| コンポーネントテスト | @testing-library/react |
+| 対象ファイル | `__tests__/**/*.test.{ts,tsx}` |
+
 ## ビルド・本番起動
 
 ```bash
