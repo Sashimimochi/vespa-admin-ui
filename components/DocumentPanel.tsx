@@ -52,7 +52,7 @@ const FULL_DOC_PLACEHOLDER = `{
  * { "assign": value } 形式へ自動変換する。
  * すでにオブジェクト形式 (assign/increment/decrement 等) の場合はそのまま。
  */
-function autoWrapAssign(body: unknown): unknown {
+export function autoWrapAssign(body: unknown): unknown {
   if (typeof body !== 'object' || body === null || !('fields' in body)) return body
   const { fields, ...rest } = body as Record<string, unknown>
   if (typeof fields !== 'object' || fields === null) return body
@@ -75,7 +75,7 @@ function autoWrapAssign(body: unknown): unknown {
  * Vespa フルドキュメント ID（`id:<namespace>:<doctype>::<user-id>`）を分解する。
  * 該当しない場合は null を返す。
  */
-function parseVespaDocId(input: string): { namespace: string; docType: string; userId: string } | null {
+export function parseVespaDocId(input: string): { namespace: string; docType: string; userId: string } | null {
   const m = input.match(/^id:([^:]+):([^:]+)::(.+)$/)
   if (!m) return null
   return { namespace: m[1], docType: m[2], userId: m[3] }
@@ -84,7 +84,7 @@ function parseVespaDocId(input: string): { namespace: string; docType: string; u
 /**
  * Vespa エラーレスポンスが「Document API 未設定」かを判定する。
  */
-function isDocApiNotConfigured(data: unknown): boolean {
+export function isDocApiNotConfigured(data: unknown): boolean {
   if (typeof data !== 'object' || data === null) return false
   const d = data as Record<string, unknown>
   return (
