@@ -19,7 +19,7 @@ const LEVEL_COLORS: Record<string, string> = {
   config: '#00b4d8',
 }
 
-function parseVespaLog(raw: string): LogLine[] {
+export function parseVespaLog(raw: string): LogLine[] {
   return raw.split('\n').filter(Boolean).map(line => {
     // Vespa log format: timestamp\thost\tpid\tservice\tcomponent\tlevel\tmessage
     const parts = line.split('\t')
