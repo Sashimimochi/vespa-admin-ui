@@ -22,13 +22,67 @@ npm run dev
 
 ブラウザで http://localhost:3000 を開く。
 
+## Docker
+
+### Docker Hub / GitHub Container Registry から起動
+
+```bash
+docker run -p 3000:3000 \
+  -e VESPA_URL=http://your-vespa:8081 \
+  -e FEED_URL=http://your-vespa:8080 \
+  -e CONFIG_URL=http://your-vespa:19071 \
+  ghcr.io/sashimimochi/vespa-admin-ui:latest
+```
+
+### docker-compose で起動
+
+```bash
+docker compose up
+```
+
+`docker-compose.yml` の `environment` セクションでVespaのエンドポイントを設定してください。
+
+### ローカルでDockerイメージをビルド
+
+```bash
+docker build -t vespa-admin-ui .
+docker run -p 3000:3000 \
+  -e VESPA_URL=http://your-vespa:8081 \
+  -e FEED_URL=http://your-vespa:8080 \
+  -e CONFIG_URL=http://your-vespa:19071 \
+  vespa-admin-ui
+```
+
+### 環境変数
+
+| 環境変数 | デフォルト | 説明 |
+|---------|-----------|------|
+| `VESPA_URL` | `http://localhost:8081` | Queryコンテナ URL（検索・ヘルス・メトリクス） |
+| `FEED_URL` | `http://localhost:8080` | FeedコンテナURL（Document API） |
+| `CONFIG_URL` | `http://localhost:19071` | Config Server URL（スキーマ・ログ） |
+
+> **Note:** UIの **⚙ Settings** でURLを変更すると、ブラウザのlocalStorageに保存され環境変数より優先されます。
+
+### Kubernetes
+
+```yaml
+env:
+  - name: VESPA_URL
+    value: "http://vespa-container:8081"
+  - name: FEED_URL
+    value: "http://vespa-container:8080"
+  - name: CONFIG_URL
+    value: "http://vespa-configserver:19071"
+```
+
 ## 設定
 
 右上の **⚙ Settings** から接続先を変更できます：
 
 | 設定項目 | デフォルト | 説明 |
 |---------|-----------|------|
-| Vespa Container URL | `http://localhost:8080` | 検索・ヘルス・メトリクスAPI |
+| Vespa Container URL | `http://localhost:8081` | 検索・ヘルス・メトリクスAPI |
+| Feed Container URL | `http://localhost:8080` | Document API |
 | Config Server URL | `http://localhost:19071` | アプリパッケージ・ログAPI |
 
 ### CORSについて
@@ -42,9 +96,6 @@ Vespa AdminサーバーからVespaへアクセスします。
 # port-forward例
 kubectl port-forward svc/vespa-container 8080:8080
 kubectl port-forward svc/vespa-configserver 19071:19071
-
-# または環境変数でURLを変更
-NEXT_PUBLIC_VESPA_URL=http://my-vespa:8080 npm run dev
 ```
 
 ## Vespa APIの対応表
