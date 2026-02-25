@@ -113,9 +113,14 @@ export function parseClusterTopology(metrics: unknown): ParsedCluster[] {
 }
 
 function NodeIcon({ node }: { node: TopologyNode }) {
+  const [hovered, setHovered] = useState(false)
   const color = node.status === 'up' ? '#22c55e' : node.status === 'down' ? '#ef4444' : '#64748b'
   return (
-    <div title={node.fullHostname} style={{ textAlign: 'center', cursor: 'default' }}>
+    <div
+      style={{ textAlign: 'center', cursor: 'default', position: 'relative' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
       <div style={{ width: 40, height: 40, background: '#1e293b', border: `2px solid ${color}40`, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', margin: '0 auto' }}>
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <rect x="2" y="2" width="16" height="6" rx="1.5" stroke={color} strokeWidth="1.3" />
@@ -128,6 +133,32 @@ function NodeIcon({ node }: { node: TopologyNode }) {
       <div style={{ fontSize: 9, fontFamily: 'monospace', color: '#64748b', marginTop: 3, maxWidth: 48, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
         {node.hostname}
       </div>
+      {hovered && (
+        <div
+          data-testid="node-tooltip"
+          style={{
+            position: 'absolute',
+            bottom: '100%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            marginBottom: 6,
+            background: '#1e293b',
+            border: '1px solid #334155',
+            borderRadius: 4,
+            padding: '4px 8px',
+            fontSize: 'var(--font-xs)',
+            fontFamily: 'monospace',
+            color: '#e2e8f0',
+            whiteSpace: 'normal',
+            maxWidth: 'min(360px, 80vw)',
+            overflowWrap: 'break-word',
+            zIndex: 10,
+            pointerEvents: 'none',
+          }}
+        >
+          {node.fullHostname}
+        </div>
+      )}
     </div>
   )
 }

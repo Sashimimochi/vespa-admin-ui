@@ -87,6 +87,75 @@ describe('HealthPanel', () => {
     expect(btn.closest('button')).toBeDisabled()
   })
 
+  // ── ノードツールチップ ─────────────────────────────────────────
+
+  it('ノードアイコンにマウスオーバーするとフルホスト名のツールチップが表示される', async () => {
+    const user = userEvent.setup()
+    const fullHostname = 'vespa-admin-0.vespa-internal.default.svc.cluster.local'
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        data: {
+          status: { code: 'up' },
+          nodes: [
+            {
+              hostname: fullHostname,
+              role: 'hosts/0',
+              services: [
+                { name: 'slobrok', clusterType: 'admin', clusterName: 'admin', configId: 'admin/slobrok.0', status: { code: 'up' } },
+              ],
+            },
+          ],
+        },
+      }),
+    })
+    render(<HealthPanel {...PROPS} />)
+    // ノードアイコン下の短縮ホスト名が表示されるまで待つ
+    await waitFor(() => expect(screen.getByText('vespa-admin-0')).toBeInTheDocument())
+
+    // ツールチップはマウスオーバー前は非表示
+    expect(screen.queryByTestId('node-tooltip')).not.toBeInTheDocument()
+
+    // ノードアイコンにマウスオーバー
+    await user.hover(screen.getByText('vespa-admin-0'))
+
+    // フルホスト名がツールチップに表示される
+    await waitFor(() => expect(screen.getByTestId('node-tooltip')).toHaveTextContent(fullHostname))
+  })
+
+  it('ノードアイコンからマウスが離れるとツールチップが消える', async () => {
+    const user = userEvent.setup()
+    const fullHostname = 'vespa-admin-0.vespa-internal.default.svc.cluster.local'
+    ;(global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        ok: true,
+        data: {
+          status: { code: 'up' },
+          nodes: [
+            {
+              hostname: fullHostname,
+              role: 'hosts/0',
+              services: [
+                { name: 'slobrok', clusterType: 'admin', clusterName: 'admin', configId: 'admin/slobrok.0', status: { code: 'up' } },
+              ],
+            },
+          ],
+        },
+      }),
+    })
+    render(<HealthPanel {...PROPS} />)
+    await waitFor(() => expect(screen.getByText('vespa-admin-0')).toBeInTheDocument())
+
+    const nodeLabel = screen.getByText('vespa-admin-0')
+    await user.hover(nodeLabel)
+    await waitFor(() => expect(screen.getByTestId('node-tooltip')).toBeInTheDocument())
+
+    await user.unhover(nodeLabel)
+    await waitFor(() => expect(screen.queryByTestId('node-tooltip')).not.toBeInTheDocument())
+  })
+
   // ── Refresh ボタン ────────────────────────────────────────────
 
   it('Refresh ボタンをクリックすると再フェッチが走る', async () => {
