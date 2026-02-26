@@ -1,8 +1,9 @@
 IMAGE_NAME  ?= sashimimochi/vespa-admin-ui
 VERSION     ?= $(shell node -p "require('./package.json').version")
 PLATFORMS   ?= linux/amd64,linux/arm64
+BUILDER     ?= vespa-admin-ui-builder
 
-.PHONY: help build push release dev test
+.PHONY: help build push release setup-builder dev test
 
 ## デフォルトターゲット
 help:
@@ -27,8 +28,14 @@ push:
 	docker push $(IMAGE_NAME):$(VERSION)
 	docker push $(IMAGE_NAME):latest
 
+## マルチプラットフォームビルド用 buildx ビルダーを作成・使用する
+setup-builder:
+	docker buildx inspect $(BUILDER) > /dev/null 2>&1 || \
+		docker buildx create --name $(BUILDER) --driver docker-container --bootstrap
+	docker buildx use $(BUILDER)
+
 ## マルチプラットフォームビルド＆Docker Hubにプッシュする (docker buildx が必要)
-release:
+release: setup-builder
 	docker buildx build \
 		--platform $(PLATFORMS) \
 		--tag $(IMAGE_NAME):$(VERSION) \
