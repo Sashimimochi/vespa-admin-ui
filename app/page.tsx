@@ -30,19 +30,16 @@ export default function Home() {
   const [configUrl, setConfigUrl] = useState(() => loadSettings().configUrl ?? 'http://localhost:19071')
   const [showSettings, setShowSettings] = useState(false)
 
-  // 環境変数からデフォルト設定を取得（localStorageに保存済みの設定がない場合のみ）
+  // 環境変数からデフォルト設定を取得（設定済みの場合は環境変数を優先）
   useEffect(() => {
-    const saved = loadSettings()
-    if (!saved.vespaUrl && !saved.feedUrl && !saved.configUrl) {
-      fetch('/api/config')
-        .then(res => res.json())
-        .then(cfg => {
-          if (cfg.vespaUrl) setVespaUrl(cfg.vespaUrl)
-          if (cfg.feedUrl) setFeedUrl(cfg.feedUrl)
-          if (cfg.configUrl) setConfigUrl(cfg.configUrl)
-        })
-        .catch(() => {})
-    }
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(cfg => {
+        if (cfg.vespaUrl) setVespaUrl(cfg.vespaUrl)
+        if (cfg.feedUrl) setFeedUrl(cfg.feedUrl)
+        if (cfg.configUrl) setConfigUrl(cfg.configUrl)
+      })
+      .catch(() => {})
   }, [])
   const [healthStatus, setHealthStatus] = useState<'unknown' | 'up' | 'down'>('unknown')
   const [fontSize, setFontSize] = useState<'medium' | 'large'>('medium')
