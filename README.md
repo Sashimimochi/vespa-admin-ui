@@ -7,6 +7,7 @@ Vespa Search Engine向けのデバッグ・管理画面です。Solr Adminのよ
 | タブ | 機能 |
 |------|------|
 | 🔍 **Search** | YQLクエリエディタ、パラメーター指定、レスポンス確認（ツリー/Raw表示） |
+| 📥 **Documents** | Document APIを使ったドキュメントのInsert・Update・Delete。単一・バッチ操作に対応 |
 | 🔬 **Query Trace** | `trace.level`経由でのクエリ解析・トークナイザー処理確認 |
 | 🗄️ **Schema / Config** | Config Server APIからアプリケーションパッケージファイル一覧・内容表示 |
 | 💚 **Health** | ノードヘルスチェック・ApplicationStatus・メトリクスノード一覧 |
@@ -15,7 +16,7 @@ Vespa Search Engine向けのデバッグ・管理画面です。Solr Adminのよ
 ## セットアップ
 
 ```bash
-cd vespa-admin
+cd vespa-admin-ui
 npm install
 npm run dev
 ```
@@ -102,11 +103,13 @@ kubectl port-forward svc/vespa-configserver 19071:19071
 
 | 機能 | API |
 |------|-----|
-| 検索 | `GET :8080/search/?yql=...` |
-| クエリトレース | `GET :8080/search/?yql=...&trace.level=4` |
-| ヘルスチェック | `GET :8080/state/v1/health` |
-| アプリケーション状態 | `GET :8080/ApplicationStatus` |
-| メトリクス | `GET :8080/metrics/v2/values` |
+| 検索 | `GET :8081/search/?yql=...` |
+| クエリトレース | `GET :8081/search/?yql=...&trace.level=4` |
+| ドキュメント挿入・更新 | `POST/PUT :8080/document/v1/{ns}/{type}/docid/{id}` |
+| ドキュメント削除 | `DELETE :8080/document/v1/{ns}/{type}/docid/{id}` |
+| ヘルスチェック | `GET :8081/state/v1/health` |
+| アプリケーション状態 | `GET :8081/ApplicationStatus` |
+| メトリクス | `GET :8081/metrics/v2/values` |
 | Config Server ヘルス | `GET :19071/state/v1/health` |
 | アプリパッケージ | `GET :19071/application/v2/tenant/{t}/application/{a}/content/` |
 | ログ | `GET :19071/log/v1/log` |
@@ -166,3 +169,54 @@ npm test -- __tests__/components/HealthPanel.test.tsx
 npm run build
 npm start
 ```
+
+## 開発者向け情報
+
+### ディレクトリ構成
+
+```
+vespa-admin-ui/
+├── app/
+│   ├── api/
+│   │   ├── config/     # 環境変数を返す API Route
+│   │   └── vespa/      # Vespa へのプロキシ API Route
+│   ├── layout.tsx      # アプリケーションレイアウト
+│   └── page.tsx        # メインページ（タブ管理・設定）
+├── components/
+│   ├── DocumentPanel.tsx  # Documents タブ
+│   ├── HealthPanel.tsx    # Health タブ
+│   ├── LogsPanel.tsx      # Logs タブ
+│   ├── SchemaPanel.tsx    # Schema / Config タブ
+│   ├── SearchPanel.tsx    # Search タブ
+│   └── TracePanel.tsx     # Query Trace タブ
+├── __tests__/
+│   ├── api/        # API Route のユニットテスト
+│   ├── components/ # React コンポーネントのテスト
+│   └── utils/      # ユーティリティ関数のテスト
+├── docs/
+│   └── VESPA_ADMIN_UI.md  # 詳細ドキュメント
+├── Dockerfile
+├── docker-compose.yml
+└── next.config.js
+```
+
+### 技術スタック
+
+| 項目 | 内容 |
+|------|------|
+| フレームワーク | Next.js 14 (App Router) |
+| 言語 | TypeScript |
+| テスト | Jest + @testing-library/react |
+| コンテナ | Docker / Docker Compose |
+
+### アーキテクチャ
+
+- **Next.js API Route (`/api/vespa`)** がブラウザとVespaの間のプロキシとして動作し、CORSの問題を回避します
+- **`/api/config`** が環境変数（`VESPA_URL`, `FEED_URL`, `CONFIG_URL`）をクライアントに返します
+- 各タブはそれぞれ独立したコンポーネント（`components/`配下）として実装されています
+
+### 新しいタブ・機能の追加
+
+1. `components/` に新しいパネルコンポーネントを作成する
+2. `app/page.tsx` の `TABS` 配列にエントリを追加する
+3. `app/page.tsx` の Content セクションで新しいコンポーネントをレンダリングする

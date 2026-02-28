@@ -11,6 +11,7 @@
 2. [セットアップ](#セットアップ)
 3. [機能一覧](#機能一覧)
    - [Search（検索エクスプローラー）](#search検索エクスプローラー)
+   - [Documents（ドキュメント操作）](#documentsドキュメント操作)
    - [Query Trace（クエリトレース）](#query-traceクエリトレース)
    - [Schema / Config（設定ファイルビューワー）](#schema--config設定ファイルビューワー)
    - [Health（ヘルスチェック）](#healthヘルスチェック)
@@ -36,7 +37,8 @@
 
 | 名称 | デフォルト | 用途 |
 |------|-----------|------|
-| Vespa Container URL | `http://localhost:8080` | 検索・ヘルス・メトリクス |
+| Vespa Container URL | `http://localhost:8081` | 検索（Search・Query Trace）・ヘルス・メトリクス |
+| Feed Container URL | `http://localhost:8080` | ドキュメント操作（Document API） |
 | Config Server URL | `http://localhost:19071` | アプリパッケージ・ログ取得 |
 
 接続先は画面右上の **⚙ Settings** からいつでも変更できます。
@@ -46,7 +48,7 @@
 ## セットアップ
 
 ```bash
-cd vespa-admin
+cd vespa-admin-ui
 npm install
 npm run dev
 # → http://localhost:3000 でアクセス
@@ -100,6 +102,62 @@ kubectl port-forward svc/vespa-configserver 19071:19071
 
 - `Ctrl + Enter`（Mac: `Cmd + Enter`）でクエリを実行
 - 結果ビューは **hits**（カード形式）/ **tree**（ツリー形式）/ **raw**（JSON文字列）から選択
+
+---
+
+### Documents（ドキュメント操作）
+
+#### できること
+
+- Document API を使ってドキュメントの **Insert（挿入）**・**Full Update（全件更新）**・**Partial Update（部分更新）**・**Delete（削除）** を実行できる
+- 単一ドキュメント（Single）またはバッチ（Batch）での操作に対応
+- JSON ファイルをアップロードしてドキュメント本文を読み込める
+- Partial Update 時、単純値フィールドを自動的に `{"assign": value}` 形式に変換する機能（auto-assign）
+- Vespa のフル ID 形式（`id:<namespace>:<doctype>::<user-id>`）を入力フィールドに貼り付けると namespace / docType / id を自動分解
+
+#### ユーザーが得られること
+
+- `curl` を書かずにブラウザ上でドキュメント操作を試せる
+- バッチ JSON を貼り付けて複数ドキュメントを一括操作できる
+- `Document API is not configured` エラーが発生した場合は `services.xml` への追加方法をその場で案内してくれる
+
+#### 操作方法
+
+1. **OPERATION** でどの操作をするかを選択（Insert / Full Update / Partial Update / Delete）
+2. **INPUT MODE** で単一（Single）かバッチ（Batch）かを選択
+3. Namespace・Doc Type・Document ID を入力（Batch モードではデフォルト値を設定）
+4. Insert / Update の場合はドキュメント本文を JSON で入力
+5. **▶ Execute** ボタンで実行、結果が RESULTS セクションに表示される
+
+#### Partial Update のフォーマット例
+
+```json
+{
+  "fields": {
+    "title": "新しいタイトル",
+    "year": { "increment": 1 }
+  }
+}
+```
+
+> **auto-assign ON** の場合、`"title": "新しいタイトル"` のような単純値は送信時に自動的に `{"assign": "新しいタイトル"}` に変換されます。
+
+#### Batch JSON のフォーマット例
+
+```json
+[
+  { "id": "doc-1", "fields": { "title": "最初のドキュメント" } },
+  { "id": "doc-2", "namespace": "custom", "docType": "article", "fields": { "title": "2つ目のドキュメント" } }
+]
+```
+
+#### 前提条件
+
+Document API を使うには、Vespa アプリケーションの `services.xml` の `<container>` ノード内に以下が必要です：
+
+```xml
+<document-api/>
+```
 
 ---
 
@@ -315,6 +373,7 @@ Log API（`/log/v1/log`）はすべての環境で有効とは限りません。
 | ノード死活確認 | ✅ | ✅ | |
 | 詳細メトリクス | △ | ❌ | Prometheus + Grafana 推奨 |
 | ログ確認 | ✅ | ✅ | |
+| ドキュメント操作（Insert/Update/Delete） | ✅ | ✅ | Document API 経由 |
 | コア/インデックス管理 | ✅ | ❌ | `vespa document` コマンドで行う |
 
 ---
@@ -325,11 +384,14 @@ Log API（`/log/v1/log`）はすべての環境で有効とは限りません。
 
 | タブ | エンドポイント | ポート | 用途 |
 |------|--------------|--------|------|
-| Search | `GET /search/` | 8080 | クエリ実行 |
-| Query Trace | `GET /search/?trace.level=N` | 8080 | トレース付きクエリ実行 |
-| Health | `GET /state/v1/health` | 8080 | Container 死活確認 |
-| Health | `GET /ApplicationStatus` | 8080 | Searcher チェーン構成 |
-| Health | `GET /metrics/v2/values` | 8080 | ノード・メトリクス |
+| Search | `GET /search/` | 8081 | クエリ実行 |
+| Query Trace | `GET /search/?trace.level=N` | 8081 | トレース付きクエリ実行 |
+| Documents | `POST /document/v1/{ns}/{type}/docid/{id}` | 8080 | ドキュメント挿入・全件更新 |
+| Documents | `PUT /document/v1/{ns}/{type}/docid/{id}` | 8080 | ドキュメント部分更新 |
+| Documents | `DELETE /document/v1/{ns}/{type}/docid/{id}` | 8080 | ドキュメント削除 |
+| Health | `GET /state/v1/health` | 8081 | Container 死活確認 |
+| Health | `GET /ApplicationStatus` | 8081 | Searcher チェーン構成 |
+| Health | `GET /metrics/v2/values` | 8081 | ノード・メトリクス |
 | Health | `GET /state/v1/health` | 19071 | Config Server 死活確認 |
 | Schema | `GET /application/v2/tenant/{t}/application/{a}/environment/{e}/region/{r}/instance/{i}/content/?recursive=true` | 19071 | ファイル一覧取得 |
 | Schema | `GET /application/v2/tenant/{t}/...content/{path}` | 19071 | ファイル内容取得 |
