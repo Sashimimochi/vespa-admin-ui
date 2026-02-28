@@ -129,6 +129,8 @@ Query Traceタブで `summary=debug-summary` を指定して実行するとト�
 
 ## テスト
 
+### ユニット・コンポーネントテスト
+
 [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/) を使用しています。テストファイルは `__tests__/` 配下に配置されています。
 
 ```
@@ -138,7 +140,7 @@ __tests__/
   utils/      # ユーティリティ関数のテスト
 ```
 
-### テスト実行
+#### テスト実行
 
 ```bash
 # 全テストを実行
@@ -154,7 +156,7 @@ npm run test:ci
 npm test -- __tests__/components/HealthPanel.test.tsx
 ```
 
-### テスト環境
+#### テスト環境
 
 | 項目 | 内容 |
 |------|------|
@@ -162,6 +164,46 @@ npm test -- __tests__/components/HealthPanel.test.tsx
 | DOM環境 | jsdom |
 | コンポーネントテスト | @testing-library/react |
 | 対象ファイル | `__tests__/**/*.test.{ts,tsx}` |
+
+### E2Eテスト
+
+[Playwright](https://playwright.dev/) を使用したブラウザベースのE2Eテストです。実際にブラウザを操作して画面の挙動を検証します。テストファイルは `e2e/` 配下に配置されています。
+
+```
+e2e/
+  home.spec.ts    # メインページ（タブナビゲーション・設定パネル・フォントサイズ切り替え）
+  search.spec.ts  # 検索パネルの画面操作
+  health.spec.ts  # ヘルスパネルの画面操作
+```
+
+#### 事前準備（初回のみ）
+
+```bash
+# Playwright ブラウザのインストール
+npx playwright install chromium
+```
+
+#### E2Eテスト実行
+
+```bash
+# E2Eテストを実行（Next.js サーバーを自動起動）
+npm run test:e2e
+
+# UI モードで実行（インタラクティブなテストランナー）
+npm run test:e2e:ui
+
+# 特定ファイルのみ実行
+npx playwright test e2e/home.spec.ts
+```
+
+#### E2Eテスト環境
+
+| 項目 | 内容 |
+|------|------|
+| テストフレームワーク | Playwright |
+| ブラウザ | Chromium |
+| 対象ファイル | `e2e/**/*.spec.ts` |
+| APIモック | `page.route()` で `/api/config`・`/api/vespa` をモック |
 
 ## ビルド・本番起動
 
