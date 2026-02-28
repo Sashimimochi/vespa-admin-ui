@@ -31,7 +31,7 @@ docker run -p 3000:3000 \
   -e VESPA_URL=http://your-vespa:8081 \
   -e FEED_URL=http://your-vespa:8080 \
   -e CONFIG_URL=http://your-vespa:19071 \
-  ghcr.io/sashimimochi/vespa-admin-ui:latest
+  343mochi/vespa-admin-ui:latest
 ```
 
 ### docker-compose で起動

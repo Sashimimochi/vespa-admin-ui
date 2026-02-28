@@ -1,6 +1,6 @@
 services:
   vespa-admin:
-    image: ghcr.io/sashimimochi/vespa-admin-ui:latest
+    image: 343mochi/vespa-admin-ui:latest
     ports:
       - "3000:3000"
     environment:
