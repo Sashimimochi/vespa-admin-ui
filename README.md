@@ -61,7 +61,7 @@ docker run -p 3000:3000 \
 | `FEED_URL` | `http://localhost:8080` | FeedコンテナURL（Document API） |
 | `CONFIG_URL` | `http://localhost:19071` | Config Server URL（スキーマ・ログ） |
 
-> **Note:** UIの **⚙ Settings** でURLを変更すると、ブラウザのlocalStorageに保存され環境変数より優先されます。
+> **Note:** 環境変数が設定されている場合は環境変数がlocalStorageより優先されます。UIの **⚙ Settings** でURLを変更すると、ブラウザのlocalStorageに保存されますが、次回アクセス時は環境変数の値で上書きされます。
 
 ### Kubernetes
 
