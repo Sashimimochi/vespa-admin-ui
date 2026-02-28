@@ -1,0 +1,12 @@
+services:
+  vespa-admin:
+    image: 343mochi/vespa-admin-ui:latest
+    ports:
+      - "3000:3000"
+    environment:
+      # Vespaのエンドポイントを環境変数で指定します
+      # 同一docker-compose内のVespaサービス名に合わせて変更してください
+      - VESPA_URL=http://vespa:8081
+      - FEED_URL=http://vespa:8080
+      - CONFIG_URL=http://vespa:19071
+    restart: unless-stopped
