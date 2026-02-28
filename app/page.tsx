@@ -32,14 +32,21 @@ export default function Home() {
 
   // 環境変数からデフォルト設定を取得（設定済みの場合は環境変数を優先）
   useEffect(() => {
-    fetch('/api/config')
-      .then(res => res.json())
+    const controller = new AbortController()
+    fetch('/api/config', { signal: controller.signal })
+      .then(res => {
+        if (!res.ok) throw new Error(`config API returned ${res.status}`)
+        return res.json()
+      })
       .then(cfg => {
         if (cfg.vespaUrl) setVespaUrl(cfg.vespaUrl)
         if (cfg.feedUrl) setFeedUrl(cfg.feedUrl)
         if (cfg.configUrl) setConfigUrl(cfg.configUrl)
       })
-      .catch(() => {})
+      .catch((err) => {
+        if (err.name !== 'AbortError') console.warn('[vespa-admin] /api/config fetch failed:', err)
+      })
+    return () => controller.abort()
   }, [])
   const [healthStatus, setHealthStatus] = useState<'unknown' | 'up' | 'down'>('unknown')
   const [fontSize, setFontSize] = useState<'medium' | 'large'>('medium')
