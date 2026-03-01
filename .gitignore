@@ -42,3 +42,9 @@ next-env.d.ts
 
 # Turbopack
 .turbo
+
+# Playwright E2E テスト
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
