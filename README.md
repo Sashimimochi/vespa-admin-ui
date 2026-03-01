@@ -129,6 +129,8 @@ Query Traceタブで `summary=debug-summary` を指定して実行するとト�
 
 ## テスト
 
+### ユニットテスト
+
 [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/) を使用しています。テストファイルは `__tests__/` 配下に配置されています。
 
 ```
@@ -138,10 +140,10 @@ __tests__/
   utils/      # ユーティリティ関数のテスト
 ```
 
-### テスト実行
+#### 実行方法
 
 ```bash
-# 全テストを実行
+# 全ユニットテストを実行
 npm test
 
 # ウォッチモードで実行（ファイル変更を監視）
@@ -154,7 +156,7 @@ npm run test:ci
 npm test -- __tests__/components/HealthPanel.test.tsx
 ```
 
-### テスト環境
+#### テスト環境
 
 | 項目 | 内容 |
 |------|------|
@@ -162,6 +164,46 @@ npm test -- __tests__/components/HealthPanel.test.tsx
 | DOM環境 | jsdom |
 | コンポーネントテスト | @testing-library/react |
 | 対象ファイル | `__tests__/**/*.test.{ts,tsx}` |
+
+### E2Eテスト
+
+[Puppeteer](https://pptr.dev/) を使用した E2E テストです。実際にブラウザを起動し、画面操作を通じて UI の挙動を検証します。テストファイルは `__tests__/e2e/` 配下に配置されています。
+
+```
+__tests__/
+  e2e/
+    navigation.test.ts  # ページ読み込み・タブナビゲーション・設定パネル・フォントサイズ切り替えのテスト
+e2e/
+  global-setup.js       # テスト前にNext.js開発サーバーを起動
+  global-teardown.js    # テスト後にサーバーを停止
+jest.e2e.config.js      # E2Eテスト専用のJest設定
+```
+
+#### 実行方法
+
+```bash
+# E2Eテストを実行（内部で自動的に開発サーバーを起動・停止）
+npm run test:e2e
+```
+
+> **Note:** E2E テストを実行すると、ポート `3001` で Next.js 開発サーバーが自動的に起動します。テスト完了後は自動的に停止します。ポート `3001` が使用中の場合はテストが失敗します。
+
+#### テスト内容
+
+| グループ | テスト数 | 内容 |
+|---------|---------|------|
+| ページ読み込み | 5件 | タイトル・ヘッダー・タブ数・ラベル・ヘルスインジケーターの表示確認 |
+| タブナビゲーション | 6件 | 各タブクリック後に対応パネルが表示されることを確認 |
+| 設定パネル | 3件 | Settings ボタンの開閉動作を確認 |
+| フォントサイズ切り替え | 3件 | フォントサイズ切り替えボタンの状態変化を確認 |
+
+#### テスト環境
+
+| 項目 | 内容 |
+|------|------|
+| テストフレームワーク | Jest |
+| ブラウザ操作 | Puppeteer（ヘッドレスChrome） |
+| 対象ファイル | `__tests__/e2e/**/*.test.ts` |
 
 ## ビルド・本番起動
 
@@ -192,9 +234,15 @@ vespa-admin-ui/
 ├── __tests__/
 │   ├── api/        # API Route のユニットテスト
 │   ├── components/ # React コンポーネントのテスト
+│   ├── e2e/        # E2E テスト（Puppeteer）
 │   └── utils/      # ユーティリティ関数のテスト
+├── e2e/
+│   ├── global-setup.js     # E2E テスト用サーバー起動
+│   └── global-teardown.js  # E2E テスト用サーバー停止
 ├── docs/
 │   └── VESPA_ADMIN_UI.md  # 詳細ドキュメント
+├── jest.config.js          # ユニットテスト用 Jest 設定
+├── jest.e2e.config.js      # E2E テスト用 Jest 設定
 ├── Dockerfile
 ├── docker-compose.yml
 └── next.config.js
@@ -206,7 +254,8 @@ vespa-admin-ui/
 |------|------|
 | フレームワーク | Next.js 14 (App Router) |
 | 言語 | TypeScript |
-| テスト | Jest + @testing-library/react |
+| ユニットテスト | Jest + @testing-library/react |
+| E2Eテスト | Jest + Puppeteer |
 | コンテナ | Docker / Docker Compose |
 
 ### アーキテクチャ
