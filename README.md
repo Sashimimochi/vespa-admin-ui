@@ -1,19 +1,21 @@
 # 🔍 Vespa Admin UI
 
-Vespa Search Engine向けのデバッグ・管理画面です。Solr Adminのような操作をWebブラウザから行えます。
+A debug and administration UI for the Vespa Search Engine. Perform Solr Admin-like operations directly from your web browser.
 
-## 機能
+> 🇯🇵 日本語ドキュメントは [docs/README_ja.md](docs/README_ja.md) をご覧ください。
 
-| タブ | 機能 |
-|------|------|
-| 🔍 **Search** | YQLクエリエディタ、パラメーター指定、レスポンス確認（ツリー/Raw表示） |
-| 📥 **Documents** | Document APIを使ったドキュメントのInsert・Update・Delete。単一・バッチ操作に対応 |
-| 🔬 **Query Trace** | `trace.level`経由でのクエリ解析・トークナイザー処理確認 |
-| 🗄️ **Schema / Config** | Config Server APIからアプリケーションパッケージファイル一覧・内容表示 |
-| 💚 **Health** | ノードヘルスチェック・ApplicationStatus・メトリクスノード一覧 |
-| 📋 **Logs** | Log APIまたはログの直接ペーストでのログ閲覧・フィルタリング |
+## Features
 
-## セットアップ
+| Tab | Description |
+|-----|-------------|
+| 🔍 **Search** | YQL query editor, parameter configuration, response viewer (tree / raw) |
+| 📥 **Documents** | Insert, Update, and Delete documents via the Document API. Supports single and batch operations |
+| 🔬 **Query Trace** | Query analysis and tokenizer inspection via `trace.level` |
+| 🗄️ **Schema / Config** | Browse application package files and their contents via the Config Server API |
+| 💚 **Health** | Node health checks, ApplicationStatus, and metrics node listing |
+| 📋 **Logs** | Log browsing and filtering via the Log API or by pasting logs directly |
+
+## Setup
 
 ```bash
 cd vespa-admin-ui
@@ -21,11 +23,11 @@ npm install
 npm run dev
 ```
 
-ブラウザで http://localhost:3000 を開く。
+Open http://localhost:3000 in your browser.
 
 ## Docker
 
-### Docker Hub / GitHub Container Registry から起動
+### Run from Docker Hub / GitHub Container Registry
 
 ```bash
 docker run -p 3000:3000 \
@@ -35,15 +37,15 @@ docker run -p 3000:3000 \
   343mochi/vespa-admin-ui:latest
 ```
 
-### docker-compose で起動
+### Run with docker-compose
 
 ```bash
 docker compose up
 ```
 
-`docker-compose.yml` の `environment` セクションでVespaのエンドポイントを設定してください。
+Configure the Vespa endpoints in the `environment` section of `docker-compose.yml`.
 
-### ローカルでDockerイメージをビルド
+### Build the Docker image locally
 
 ```bash
 docker build -t vespa-admin-ui .
@@ -54,15 +56,15 @@ docker run -p 3000:3000 \
   vespa-admin-ui
 ```
 
-### 環境変数
+### Environment Variables
 
-| 環境変数 | デフォルト | 説明 |
-|---------|-----------|------|
-| `VESPA_URL` | `http://localhost:8081` | Queryコンテナ URL（検索・ヘルス・メトリクス） |
-| `FEED_URL` | `http://localhost:8080` | FeedコンテナURL（Document API） |
-| `CONFIG_URL` | `http://localhost:19071` | Config Server URL（スキーマ・ログ） |
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `VESPA_URL` | `http://localhost:8081` | Query container URL (search, health, metrics) |
+| `FEED_URL` | `http://localhost:8080` | Feed container URL (Document API) |
+| `CONFIG_URL` | `http://localhost:19071` | Config Server URL (schema, logs) |
 
-> **Note:** 環境変数が設定されている場合は環境変数がlocalStorageより優先されます。UIの **⚙ Settings** でURLを変更すると、ブラウザのlocalStorageに保存されますが、環境変数が設定されている間はアクセスのたびに環境変数の値が適用されます。
+> **Note:** When environment variables are set, they take precedence over values stored in localStorage. Changing the URL via **⚙ Settings** in the UI saves it to the browser's localStorage, but environment variable values will be applied on each page load as long as they are set.
 
 ### Kubernetes
 
@@ -76,47 +78,47 @@ env:
     value: "http://vespa-configserver:19071"
 ```
 
-## 設定
+## Configuration
 
-右上の **⚙ Settings** から接続先を変更できます：
+Use **⚙ Settings** in the upper right corner to change connection targets:
 
-| 設定項目 | デフォルト | 説明 |
-|---------|-----------|------|
-| Vespa Container URL | `http://localhost:8081` | 検索・ヘルス・メトリクスAPI |
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Vespa Container URL | `http://localhost:8081` | Search, health, and metrics API |
 | Feed Container URL | `http://localhost:8080` | Document API |
-| Config Server URL | `http://localhost:19071` | アプリパッケージ・ログAPI |
+| Config Server URL | `http://localhost:19071` | Application package and logs API |
 
-### CORSについて
+### About CORS
 
-Next.jsのAPI Routeがプロキシとして機能するため、ブラウザのCORS制約は問題になりません。
-Vespa AdminサーバーからVespaへアクセスします。
+Since Next.js API Routes act as a proxy, browser CORS restrictions are not an issue.
+Requests to Vespa are made from the Vespa Admin server.
 
-### Kubernetes/Docker環境
+### Kubernetes / Docker Environments
 
 ```bash
-# port-forward例
+# Example port-forward
 kubectl port-forward svc/vespa-container 8080:8080
 kubectl port-forward svc/vespa-configserver 19071:19071
 ```
 
-## Vespa APIの対応表
+## Vespa API Reference
 
-| 機能 | API |
-|------|-----|
-| 検索 | `GET :8081/search/?yql=...` |
-| クエリトレース | `GET :8081/search/?yql=...&trace.level=4` |
-| ドキュメント挿入・更新 | `POST/PUT :8080/document/v1/{ns}/{type}/docid/{id}` |
-| ドキュメント削除 | `DELETE :8080/document/v1/{ns}/{type}/docid/{id}` |
-| ヘルスチェック | `GET :8081/state/v1/health` |
-| アプリケーション状態 | `GET :8081/ApplicationStatus` |
-| メトリクス | `GET :8081/metrics/v2/values` |
-| Config Server ヘルス | `GET :19071/state/v1/health` |
-| アプリパッケージ | `GET :19071/application/v2/tenant/{t}/application/{a}/content/` |
-| ログ | `GET :19071/log/v1/log` |
+| Feature | API |
+|---------|-----|
+| Search | `GET :8081/search/?yql=...` |
+| Query Trace | `GET :8081/search/?yql=...&trace.level=4` |
+| Document Insert / Update | `POST/PUT :8080/document/v1/{ns}/{type}/docid/{id}` |
+| Document Delete | `DELETE :8080/document/v1/{ns}/{type}/docid/{id}` |
+| Health Check | `GET :8081/state/v1/health` |
+| Application Status | `GET :8081/ApplicationStatus` |
+| Metrics | `GET :8081/metrics/v2/values` |
+| Config Server Health | `GET :19071/state/v1/health` |
+| Application Package | `GET :19071/application/v2/tenant/{t}/application/{a}/content/` |
+| Logs | `GET :19071/log/v1/log` |
 
-## トークン解析の詳細確認
+## Inspecting Indexed Tokens
 
-スキーマにデバッグサマリを追加すると、実際にインデックスされたトークンが確認できます：
+Adding a debug summary to your schema lets you inspect the actual tokens indexed for a field:
 
 ```sd
 document-summary debug-summary {
@@ -125,140 +127,141 @@ document-summary debug-summary {
 }
 ```
 
-Query Traceタブで `summary=debug-summary` を指定して実行するとトークンが表示されます。
+Run a query in the Query Trace tab with `summary=debug-summary` to view the tokens.
 
-## テスト
+## Testing
 
-### ユニット・コンポーネントテスト
+### Unit / Component Tests
 
-[Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/) を使用しています。テストファイルは `__tests__/` 配下に配置されています。
+Uses [Jest](https://jestjs.io/) + [Testing Library](https://testing-library.com/). Test files are located under `__tests__/`.
 
 ```
 __tests__/
-  api/        # API Route のユニットテスト
-  components/ # React コンポーネントのテスト
-  utils/      # ユーティリティ関数のテスト
+  api/        # Unit tests for API Routes
+  components/ # React component tests
+  utils/      # Utility function tests
 ```
 
-#### テスト実行
+#### Running Tests
 
 ```bash
-# 全テストを実行
+# Run all tests
 npm test
 
-# ウォッチモードで実行（ファイル変更を監視）
+# Run in watch mode (monitors file changes)
 npm test -- --watch
 
-# CI環境向け（インタラクティブ入力なし）
+# For CI environments (no interactive input)
 npm run test:ci
 
-# 特定ファイルのみ実行
+# Run a specific file
 npm test -- __tests__/components/HealthPanel.test.tsx
 ```
 
-#### テスト環境
+#### Test Environment
 
-| 項目 | 内容 |
-|------|------|
-| テストフレームワーク | Jest |
-| DOM環境 | jsdom |
-| コンポーネントテスト | @testing-library/react |
-| 対象ファイル | `__tests__/**/*.test.{ts,tsx}` |
+| Item | Details |
+|------|---------|
+| Test framework | Jest |
+| DOM environment | jsdom |
+| Component testing | @testing-library/react |
+| Target files | `__tests__/**/*.test.{ts,tsx}` |
 
-### E2Eテスト
+### E2E Tests
 
-[Playwright](https://playwright.dev/) を使用したブラウザベースのE2Eテストです。実際にブラウザを操作して画面の挙動を検証します。テストファイルは `e2e/` 配下に配置されています。
+Browser-based E2E tests using [Playwright](https://playwright.dev/). Tests are located under `e2e/`.
 
 ```
 e2e/
-  home.spec.ts    # メインページ（タブナビゲーション・設定パネル・フォントサイズ切り替え）
-  search.spec.ts  # 検索パネルの画面操作
-  health.spec.ts  # ヘルスパネルの画面操作
+  home.spec.ts    # Main page (tab navigation, settings panel, font size toggle)
+  search.spec.ts  # Search panel interactions
+  health.spec.ts  # Health panel interactions
 ```
 
-#### 事前準備（初回のみ）
+#### First-time Setup
 
 ```bash
-# Playwright ブラウザのインストール
+# Install Playwright browsers
 npx playwright install chromium
 ```
 
-#### E2Eテスト実行
+#### Running E2E Tests
 
 ```bash
-# E2Eテストを実行（Next.js サーバーを自動起動）
+# Run E2E tests (auto-starts the Next.js server)
 npm run test:e2e
 
-# UI モードで実行（インタラクティブなテストランナー）
+# Run in UI mode (interactive test runner)
 npm run test:e2e:ui
 
-# 特定ファイルのみ実行
+# Run a specific file
 npx playwright test e2e/home.spec.ts
 ```
 
-#### E2Eテスト環境
+#### E2E Test Environment
 
-| 項目 | 内容 |
-|------|------|
-| テストフレームワーク | Playwright |
-| ブラウザ | Chromium |
-| 対象ファイル | `e2e/**/*.spec.ts` |
-| APIモック | `page.route()` で `/api/config`・`/api/vespa` をモック |
+| Item | Details |
+|------|---------|
+| Test framework | Playwright |
+| Browser | Chromium |
+| Target files | `e2e/**/*.spec.ts` |
+| API mocking | `/api/config` and `/api/vespa` mocked via `page.route()` |
 
-## ビルド・本番起動
+## Build / Production Start
 
 ```bash
 npm run build
 npm start
 ```
 
-## 開発者向け情報
+## Developer Guide
 
-### ディレクトリ構成
+### Directory Structure
 
 ```
 vespa-admin-ui/
 ├── app/
 │   ├── api/
-│   │   ├── config/     # 環境変数を返す API Route
-│   │   └── vespa/      # Vespa へのプロキシ API Route
-│   ├── layout.tsx      # アプリケーションレイアウト
-│   └── page.tsx        # メインページ（タブ管理・設定）
+│   │   ├── config/     # API Route returning environment variables
+│   │   └── vespa/      # Proxy API Route to Vespa
+│   ├── layout.tsx      # Application layout
+│   └── page.tsx        # Main page (tab management, settings)
 ├── components/
-│   ├── DocumentPanel.tsx  # Documents タブ
-│   ├── HealthPanel.tsx    # Health タブ
-│   ├── LogsPanel.tsx      # Logs タブ
-│   ├── SchemaPanel.tsx    # Schema / Config タブ
-│   ├── SearchPanel.tsx    # Search タブ
-│   └── TracePanel.tsx     # Query Trace タブ
+│   ├── DocumentPanel.tsx  # Documents tab
+│   ├── HealthPanel.tsx    # Health tab
+│   ├── LogsPanel.tsx      # Logs tab
+│   ├── SchemaPanel.tsx    # Schema / Config tab
+│   ├── SearchPanel.tsx    # Search tab
+│   └── TracePanel.tsx     # Query Trace tab
 ├── __tests__/
-│   ├── api/        # API Route のユニットテスト
-│   ├── components/ # React コンポーネントのテスト
-│   └── utils/      # ユーティリティ関数のテスト
+│   ├── api/        # Unit tests for API Routes
+│   ├── components/ # React component tests
+│   └── utils/      # Utility function tests
 ├── docs/
-│   └── VESPA_ADMIN_UI.md  # 詳細ドキュメント
+│   ├── README_ja.md       # Japanese README
+│   └── VESPA_ADMIN_UI.md  # Detailed documentation (Japanese)
 ├── Dockerfile
 ├── docker-compose.yml
 └── next.config.js
 ```
 
-### 技術スタック
+### Tech Stack
 
-| 項目 | 内容 |
-|------|------|
-| フレームワーク | Next.js 14 (App Router) |
-| 言語 | TypeScript |
-| テスト | Jest + @testing-library/react |
-| コンテナ | Docker / Docker Compose |
+| Item | Details |
+|------|---------|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript |
+| Testing | Jest + @testing-library/react |
+| Container | Docker / Docker Compose |
 
-### アーキテクチャ
+### Architecture
 
-- **Next.js API Route (`/api/vespa`)** がブラウザとVespaの間のプロキシとして動作し、CORSの問題を回避します
-- **`/api/config`** が環境変数（`VESPA_URL`, `FEED_URL`, `CONFIG_URL`）をクライアントに返します
-- 各タブはそれぞれ独立したコンポーネント（`components/`配下）として実装されています
+- **Next.js API Route (`/api/vespa`)** acts as a proxy between the browser and Vespa, avoiding CORS issues
+- **`/api/config`** returns environment variables (`VESPA_URL`, `FEED_URL`, `CONFIG_URL`) to the client
+- Each tab is implemented as an independent component under `components/`
 
-### 新しいタブ・機能の追加
+### Adding New Tabs / Features
 
-1. `components/` に新しいパネルコンポーネントを作成する
-2. `app/page.tsx` の `TABS` 配列にエントリを追加する
-3. `app/page.tsx` の Content セクションで新しいコンポーネントをレンダリングする
+1. Create a new panel component in `components/`
+2. Add an entry to the `TABS` array in `app/page.tsx`
+3. Render the new component in the Content section of `app/page.tsx`
